@@ -11,30 +11,27 @@ export const contentType = 'image/png'
 export default function Icon() {
     return new ImageResponse(
         (
-            // ImageResponse JSX element
             <div
                 style={{
-                    fontSize: 20,
+                    fontSize: 16,
                     background: '#0f0f0f',
                     width: '100%',
                     height: '100%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#ff9f43',
-                    fontWeight: 700,
-                    borderRadius: '20%',
-                    border: '1px solid #333',
+                    fontWeight: 800,
+                    borderRadius: '8px', // Slightly rounded square, modern standard
+                    fontFamily: 'sans-serif',
+                    letterSpacing: '-1px',
                 }}
             >
-                A
+                {/* White "A" */}
+                <div style={{ color: '#ffffff' }}>A</div>
+                {/* Orange "T" */}
+                <div style={{ color: '#ff9f43' }}>T</div>
             </div>
         ),
-        // ImageResponse options
-        {
-            // For convenience, we can re-use the exported icons size metadata
-            // config to also set the ImageResponse's width and height.
-            ...size,
-        }
+        { ...size }
     )
 }
