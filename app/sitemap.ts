@@ -1,32 +1,13 @@
-import { MetadataRoute } from 'next';
+import { MetadataRoute } from "next";
+import { SITE } from "@/lib/content";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://ajiththaduri.site';
-
-    return [
-        {
-            url: baseUrl,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 1.0,
-        },
-        {
-            url: `${baseUrl}/#about`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/#experience`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/#projects`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-    ];
+  return [
+    {
+      url: SITE.url,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 1.0,
+    },
+  ];
 }

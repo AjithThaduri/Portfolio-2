@@ -1,20 +1,224 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Theme tokens. Light is the default; dark applies when the user has chosen it
+   (data-theme="dark") or when the OS prefers dark and no explicit choice is set.
+--------------------------------------------------------------------------- */
+
 :root {
-  --background: #0f0f0f;
-  --foreground: #ededed;
-  --font-sans: var(--font-inter);
+  --bg: #fcfcfb;
+  --surface: #f3f3f0;
+  --raised: #ffffff;
+  --line: #e3e3de;
+  --line-soft: #ededea;
+
+  --text: #15151a;
+  --muted: #53535d;
+  --faint: #83838d;
+
+  --accent: #a8560f;        /* text-safe on light */
+  --accent-vivid: #e8811f;  /* decorative marks, rules, dots */
+  --teal: #0c7d6e;
+  --flag: #c33f28;
+
+  /* canvas */
+  --glow-a: 0.11;
+  --glow-b: 0.085;
+  --sim-bg: #f7f7f6;
+  --sim-additive: 0;
+  --sim-trail: 0.92;   /* near-full clear: trails smear on a light ground */
+  --sim-floor: 0.8;
+  --sim-halo: 0.11;
+  --sim-lane: 0.22;
+  --sim-scale: 1.5;
+}
+
+:root[data-theme="dark"] {
+  --bg: #08080a;
+  --surface: #0e0e11;
+  --raised: #16161b;
+  --line: #232329;
+  --line-soft: #17171c;
+
+  --text: #eceef1;
+  --muted: #a3a4ac;
+  --faint: #71727c;
+
+  --accent: #ff9f43;
+  --accent-vivid: #ff9f43;
+  --teal: #68d6c6;
+  --flag: #ff5e4a;
+
+  --glow-a: 0.18;
+  --glow-b: 0.14;
+  --sim-bg: #08080a;
+  --sim-additive: 1;
+  --sim-trail: 0.155;
+  --sim-floor: 0.32;
+  --sim-halo: 0.16;
+  --sim-lane: 0.026;
+  --sim-scale: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #08080a;
+    --surface: #0e0e11;
+    --raised: #16161b;
+    --line: #232329;
+    --line-soft: #17171c;
+
+    --text: #eceef1;
+    --muted: #a3a4ac;
+    --faint: #71727c;
+
+    --accent: #ff9f43;
+    --accent-vivid: #ff9f43;
+    --teal: #68d6c6;
+    --flag: #ff5e4a;
+
+    --glow-a: 0.18;
+    --glow-b: 0.14;
+    --sim-bg: #08080a;
+    --sim-additive: 1;
+    --sim-trail: 0.155;
+    --sim-floor: 0.32;
+    --sim-halo: 0.16;
+    --sim-lane: 0.026;
+    --sim-scale: 1;
+  }
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --color-ink: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-vivid: var(--accent-vivid);
+  --color-teal: var(--teal);
+  --color-flag: var(--flag);
+
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-plex-mono);
 }
 
+/* Lenis owns smooth scrolling; native smooth behaviour cancels its scrollTo. */
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), system-ui, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+::selection {
+  background: var(--accent-vivid);
+  color: #08080a;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Faint measuring grid used to give alternating sections their own texture. */
+.texture-grid {
+  background-image:
+    linear-gradient(to right, var(--line-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-soft) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+.texture-rule {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--line-soft) 0px,
+    var(--line-soft) 1px,
+    transparent 1px,
+    transparent 10px
+  );
+}
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+  animation: ticker 42s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticker {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- Secret page motion ---------------------------------------------------- */
+@keyframes vasuki-lane-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+@keyframes vasuki-lane-down {
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
+}
+@keyframes vasuki-cue {
+  0%, 100% { opacity: 0.25; transform: scaleY(0.6); transform-origin: top; }
+  50%      { opacity: 1;    transform: scaleY(1);   transform-origin: top; }
+}
+@keyframes vasuki-float {
+  from { transform: translateY(-14px) rotate(-2deg); }
+  to   { transform: translateY(14px) rotate(2deg); }
+}
+@keyframes vasuki-eq {
+  0%, 100% { height: 4px; }
+  50%      { height: 12px; }
+}
+@keyframes vasuki-shimmer {
+  from { background-position: 18% 40%; }
+  to   { background-position: 82% 60%; }
+}
+@keyframes vasuki-tile-in {
+  from {
+    opacity: 0;
+    transform: translateZ(-620px) rotateX(-26deg);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(var(--z, 0px)) rotateX(0deg);
+    filter: blur(0px);
+  }
+}
+.vasuki-tile {
+  animation: vasuki-tile-in 1.5s cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0s) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vasuki-tile { animation: none; opacity: 1; transform: none; }
+}
+@keyframes vasuki-in {
+  from { opacity: 0; transform: translateY(26px); filter: blur(16px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.vasuki-in {
+  animation: vasuki-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0s) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vasuki-in { animation: none; opacity: 1; transform: none; filter: none; }
 }
