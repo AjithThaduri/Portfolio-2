@@ -1,10 +1,12 @@
 import {
   SITE,
   HERO,
-  THESIS,
+  PRINCIPLES,
   FLAGSHIP,
   MORE_WORK,
-  PRACTICE,
+  HELP,
+  ABOUT,
+  MODEL,
   TEACHING,
   STACK,
   FAQ,
@@ -21,7 +23,7 @@ export function GET() {
   lines.push("# Ajith Thaduri");
   lines.push("");
   lines.push(
-    "> AI engineer, technical consultant and instructor. Builds production AI systems — agentic architectures, retrieval pipelines and self-hosted language models — for government, healthcare and legal organisations. Also builds AI-driven security tooling and teaches engineering teams.",
+    "> AI engineer and technical consultant. Builds production AI systems — agentic architectures, retrieval pipelines and self-hosted language models — for healthcare, legal and government organisations. Also builds AI-driven security tooling and teaches engineering teams.",
   );
   lines.push("");
   lines.push(`- Website: ${SITE.url}`);
@@ -35,14 +37,18 @@ export function GET() {
   lines.push("");
   lines.push(HERO.lede);
   lines.push("");
-  for (const s of HERO.stats) lines.push(`- ${s.value} — ${s.label} (${s.sub})`);
+  for (const s of HERO.stats) lines.push(`- ${s.value} — ${s.label}`);
   lines.push("");
+  for (const para of ABOUT.body) {
+    lines.push(para);
+    lines.push("");
+  }
 
-  lines.push("## Approach");
+  lines.push("## How he works");
   lines.push("");
-  lines.push(`"${THESIS.quote}"`);
+  lines.push(PRINCIPLES.lede);
   lines.push("");
-  for (const p of THESIS.principles) lines.push(`- **${p.title}** — ${p.body}`);
+  for (const p of PRINCIPLES.items) lines.push(`- **${p.title}** — ${p.body}`);
   lines.push("");
 
   lines.push("## Selected work");
@@ -52,6 +58,8 @@ export function GET() {
     lines.push("");
     lines.push(`- Sector: ${p.sector}`);
     lines.push(`- Role: ${p.role}`);
+    lines.push(`- Page: ${SITE.url}/work/${p.slug}`);
+    lines.push(`- In plain terms: ${p.plain}`);
     lines.push(`- Problem: ${p.problem}`);
     for (const d of p.decisions) lines.push(`- ${d.head}: ${d.body}`);
     lines.push(`- Built with: ${p.stack.join(", ")}`);
@@ -65,15 +73,22 @@ export function GET() {
   }
   lines.push("");
 
-  lines.push("## How he works");
+  lines.push("## Where he helps");
   lines.push("");
-  for (const p of PRACTICE) {
-    lines.push(`### ${p.title}`);
+  for (const h of HELP.items) {
+    lines.push(`### ${h.title}`);
     lines.push("");
-    lines.push(p.lede);
-    for (const pt of p.points) lines.push(`- ${pt}`);
+    lines.push(h.body);
+    for (const pt of h.points) lines.push(`- ${pt}`);
     lines.push("");
   }
+
+  lines.push("## Model work");
+  lines.push("");
+  lines.push(MODEL.lede);
+  lines.push("");
+  for (const t of MODEL.tracks) lines.push(`- **${t.title}** — ${t.items.join("; ")}`);
+  lines.push("");
 
   lines.push("## Teaching");
   lines.push("");
@@ -81,12 +96,14 @@ export function GET() {
   lines.push("");
   for (const s of TEACHING.stats) lines.push(`- ${s.value} — ${s.label}`);
   lines.push("");
+  for (const p of TEACHING.programmes) lines.push(`- **${p.title}** (${p.sector}) — ${p.body}`);
+  lines.push("");
   lines.push(`Topics: ${TEACHING.topics.join(", ")}`);
   lines.push("");
 
   lines.push("## Technical stack");
   lines.push("");
-  for (const g of STACK) lines.push(`- **${g.group}**: ${g.items.join(", ")}`);
+  for (const g of STACK.groups) lines.push(`- **${g.group}**: ${g.items.join(", ")}`);
   lines.push("");
 
   lines.push("## Questions and answers");

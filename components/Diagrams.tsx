@@ -28,7 +28,7 @@ function Box({
       y={y}
       width={w}
       height={h}
-      rx={3}
+      rx={6}
       fill={FILL}
       stroke={accent ? ACCENT : L}
       strokeWidth={1}
@@ -89,7 +89,7 @@ const Frame = ({
   label: string;
   children: React.ReactNode;
 }) => (
-  <figure className="my-10 overflow-x-auto rounded border border-line bg-surface">
+  <figure className="overflow-x-auto rounded-2xl border border-line bg-surface p-2 sm:p-4">
     <svg
       viewBox={viewBox}
       role="img"
@@ -186,7 +186,7 @@ export function ClaimsPipelineDiagram() {
       label="Claims pipeline: unstructured documents pass through a PHI redaction tier before a document intelligence layer structures them, backed by asynchronous job processing and a semantic cache."
     >
       {/* semantic cache */}
-      <rect x={460} y={10} width={180} height={40} rx={3} fill="none" stroke={L} strokeDasharray="3 3" />
+      <rect x={460} y={10} width={180} height={40} rx={6} fill="none" stroke={L} strokeDasharray="3 3" />
       <text x={550} y={27} fill={FAINT} fontSize={11} textAnchor="middle">
         semantic cache
       </text>
@@ -212,7 +212,7 @@ export function ClaimsPipelineDiagram() {
       })}
 
       {/* async lane */}
-      <rect x={240} y={210} width={400} height={44} rx={3} fill={FILL} stroke={L} />
+      <rect x={240} y={210} width={400} height={44} rx={6} fill={FILL} stroke={L} />
       <text x={440} y={237} fill={BODY} fontSize={11} textAnchor="middle">
         Redis — asynchronous job processing at document volume
       </text>
@@ -412,7 +412,7 @@ export function PentestHarnessDiagram() {
       </text>
 
       {/* AI-product coverage module feeding the generator */}
-      <rect x={368} y={8} width={230} height={44} rx={3} fill="none" stroke={ACCENT} strokeDasharray="3 3" />
+      <rect x={368} y={8} width={230} height={44} rx={6} fill="none" stroke={ACCENT} strokeDasharray="3 3" />
       <text x={483} y={26} fill={ACCENT} fontSize={10} textAnchor="middle">
         AI-product module
       </text>

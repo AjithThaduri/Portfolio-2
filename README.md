@@ -7,29 +7,33 @@ Personal site — AI engineering, consulting and teaching.
 **All copy lives in `lib/content.ts`.** Components read from it; you should not
 need to touch a component to change what the site says.
 
-| What                          | Where in `lib/content.ts` |
-| ----------------------------- | ------------------------- |
-| Email, LinkedIn, GitHub       | `SITE`                    |
-| Headline, lede, top stats     | `HERO`                    |
-| Thesis quote + four principles| `THESIS`                  |
-| The three deep case studies   | `FLAGSHIP`                |
-| The "Also built" grid         | `MORE_WORK`               |
-| Practice areas                | `PRACTICE`                |
-| Teaching stats and topics     | `TEACHING`                |
-| Stack groups                  | `STACK`                   |
+| Page / area              | What                                   | Where in `lib/content.ts`       |
+| ------------------------ | -------------------------------------- | ------------------------------- |
+| every page               | Email, LinkedIn, GitHub · nav · contact | `SITE`, `NAV`, `CONTACT`        |
+| `/`                      | Hero, notes around the portrait        | `HERO`                          |
+| `/`                      | Project cards                          | `WORK_INTRO`, `FLAGSHIP`        |
+| `/`                      | "Also built" grid (+ show more)        | `MORE_WORK`, `MORE_WORK_INITIAL`|
+| `/`                      | How I work · Where I can help          | `PRINCIPLES`, `HELP`            |
+| `/work/[slug]`           | Full case study per `FLAGSHIP` entry   | `FLAGSHIP`                      |
+| `/about`                 | Story, model work, tools, FAQ          | `ABOUT`, `MODEL`, `STACK`, `FAQ`|
+| `/teaching`              | Teaching stats, programmes, topics     | `TEACHING`                      |
 
 ### Adding a project
 
-`MORE_WORK` ships with four entries marked `status: "draft"`. Fill one in and
-change its status to `"live"`. Draft cards render greyed out with a
-"DRAFT SLOT — FILL IN" label so they are obvious; set `SHOW_DRAFTS = false` at
-the top of the file to hide them all before a deploy.
+Add an entry to `MORE_WORK` with `status: "live"`. The first
+`MORE_WORK_INITIAL` entries show on load; the rest sit behind "Show more", so
+order the list by what you most want seen. `status: "draft"` cards render
+greyed out with a "DRAFT SLOT — FILL IN" label; `SHOW_DRAFTS = false` hides them.
+
+A new flagship case study is a new `FLAGSHIP` entry with a unique `slug` — its
+page at `/work/<slug>` is generated automatically.
 
 ### House rules the copy follows
 
 - Sectors, never client or employer names.
 - No dates, no tenure, no years, anywhere.
 - Nothing claimed that has not actually shipped.
+- Voice: first person, calm and specific — detail over adjectives.
 
 ### Architecture diagrams
 

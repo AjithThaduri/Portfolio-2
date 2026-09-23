@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Ajith Thaduri — AI Engineer, Consultant & Instructor";
+export const alt = "Ajith Thaduri — AI Engineer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -29,7 +29,7 @@ export default function OpengraphImage() {
               textTransform: "uppercase",
             }}
           >
-            AI Engineer · Consultant · Instructor
+            AI Engineer · Hyderabad, India
           </div>
         </div>
 
@@ -42,7 +42,7 @@ export default function OpengraphImage() {
               letterSpacing: -2.5,
             }}
           >
-            I build AI systems for places
+            I build AI systems for teams
           </div>
           <div
             style={{
@@ -52,7 +52,7 @@ export default function OpengraphImage() {
               letterSpacing: -2.5,
             }}
           >
-            where failure is not an option.
+            handling sensitive data.
           </div>
         </div>
 
@@ -69,8 +69,7 @@ export default function OpengraphImage() {
         >
           <div style={{ display: "flex", gap: 40 }}>
             <span>10+ platforms</span>
-            <span>3 regulated domains</span>
-            <span>500+ taught</span>
+            <span>3 regulated sectors</span>
           </div>
           <div style={{ display: "flex", color: "#eceef1" }}>
             <span>Ajith</span>
