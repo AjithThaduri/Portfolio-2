@@ -5,12 +5,20 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { NAV, SITE } from "@/lib/content";
+import { lockScroll } from "./SmoothScroll";
 import { ThemeToggle } from "./ThemeToggle";
 
 export const Nav = () => {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
+  // The menu remembers the page it was opened on, so any navigation —
+  // a link, Back, Forward — closes it without extra effects.
+  const [openOn, setOpenOn] = useState<string | null>(null);
+  const open = openOn === pathname;
+  const setOpen = (next: boolean | ((v: boolean) => boolean)) => {
+    const value = typeof next === "function" ? next(open) : next;
+    setOpenOn(value ? pathname : null);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -19,12 +27,7 @@ export const Nav = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+  useEffect(() => (open ? lockScroll() : undefined), [open]);
 
   /* On the home page, section links become plain hashes so the smooth
      scroller can take them; elsewhere they navigate home first. */

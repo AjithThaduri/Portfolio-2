@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { lockScroll } from "./SmoothScroll";
 
 export type SearchItem = { title: string; href: string; group: string; hint?: string };
 
@@ -35,6 +36,8 @@ export const CommandPalette = ({ items }: { items: SearchItem[] }) => {
       window.removeEventListener("open-palette", onOpen);
     };
   }, [open]);
+
+  useEffect(() => (open ? lockScroll() : undefined), [open]);
 
   const results = useMemo(() => {
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -109,7 +112,7 @@ export const CommandPalette = ({ items }: { items: SearchItem[] }) => {
               />
               <kbd className="rounded-md border border-line px-1.5 py-0.5 font-mono text-[10px] text-faint">esc</kbd>
             </div>
-            <ul id="cmd-results" role="listbox" className="max-h-[55vh] overflow-y-auto p-2">
+            <ul id="cmd-results" role="listbox" data-lenis-prevent className="max-h-[55vh] overflow-y-auto overscroll-contain p-2">
               {results.length === 0 && <li className="px-4 py-8 text-center text-sm text-faint">No matches.</li>}
               {results.map((r, idx) => {
                 const header = idx === 0 || results[idx - 1].group !== r.group;
