@@ -68,5 +68,14 @@ export const Work = () => (
     <SectionHead eyebrow={WORK_INTRO.title} title={WORK_INTRO.lede} />
     <FlagshipCards />
     <MoreWork />
+    <div className="mt-12 flex justify-center">
+      <Link
+        href="/work"
+        className="group inline-flex items-center gap-2 text-sm font-medium text-text transition-colors hover:text-accent"
+      >
+        See all work, filterable by capability
+        <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+      </Link>
+    </div>
   </Section>
 );

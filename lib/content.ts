@@ -7,6 +7,12 @@
    /work/[slug]      one FLAGSHIP entry in full
    /about            ABOUT, MODEL, STACK, FAQ
    /teaching         TEACHING
+   /work             WORK_INDEX (every FLAGSHIP + MORE_WORK, filterable)
+   /capabilities/*   CAPABILITIES
+   /work-with-me     ENGAGE
+   /blueprints       BLUEPRINTS_INTRO — articles themselves are MDX files in
+                     content/blueprints/ (see lib/blueprints.ts)
+   /glossary         lib/glossary.ts
    every page        CONTACT (bottom), NAV (top)
 
    HOW TO ADD A PROJECT
@@ -40,10 +46,21 @@ export const SITE = {
 } as const;
 
 export const NAV = [
-  { label: "Work", href: "/#work" },
+  { label: "Work", href: "/work" },
+  { label: "Blueprints", href: "/blueprints" },
   { label: "About", href: "/about" },
   { label: "Teaching", href: "/teaching" },
 ];
+
+/* Capability slugs used to tag work and blueprint topics. */
+export type Cap =
+  | "retrieval"
+  | "agents"
+  | "guardrails"
+  | "models"
+  | "voice"
+  | "security"
+  | "evaluation";
 
 export const HERO = {
   eyebrow: "AI Engineer · Hyderabad, India",
@@ -85,6 +102,7 @@ export type Flagship = {
   diagram: "phi-boundary" | "claims-pipeline" | "rag-gate" | "pentest-harness";
   decisions: { head: string; body: string }[];
   stack: string[];
+  caps: Cap[];
 };
 
 export const FLAGSHIP: Flagship[] = [
@@ -134,6 +152,7 @@ export const FLAGSHIP: Flagship[] = [
       "Self-hosted clinical LLM",
       "TLS 1.3 / AES-256",
     ],
+    caps: ["guardrails", "models", "retrieval"],
   },
   {
     slug: "claims-intelligence",
@@ -165,6 +184,7 @@ export const FLAGSHIP: Flagship[] = [
       },
     ],
     stack: ["TypeScript", "Claude API", "PostgreSQL", "Redis", "In-house PHI layer"],
+    caps: ["retrieval", "guardrails"],
   },
   {
     slug: "secure-enterprise-assistant",
@@ -212,6 +232,7 @@ export const FLAGSHIP: Flagship[] = [
       "SQLAlchemy",
       "Enterprise SSO",
     ],
+    caps: ["retrieval", "guardrails"],
   },
   {
     slug: "ai-penetration-testing",
@@ -258,6 +279,7 @@ export const FLAGSHIP: Flagship[] = [
       "Re-test workflow",
       "Scoped engagement controls",
     ],
+    caps: ["security", "agents"],
   },
 ];
 
@@ -267,6 +289,7 @@ export type WorkItem = {
   body: string;
   tags: string[];
   status: "live" | "draft";
+  caps: Cap[];
 };
 
 /* Ordered by what should be seen first — the first MORE_WORK_INITIAL show
@@ -278,6 +301,7 @@ export const MORE_WORK: WorkItem[] = [
     body: "Adapted an open-weights model to the client's domain, compressed it to fit their existing GPUs and served it inside their own network, so no request ever left. The project existed because a hosted API wasn't an option.",
     tags: ["QLoRA", "Quantization", "On-prem serving"],
     status: "live",
+    caps: ["models"],
   },
   {
     title: "Realtime Voice Agent",
@@ -285,6 +309,7 @@ export const MORE_WORK: WorkItem[] = [
     body: "Speech in, reasoning and tool calls in the middle, ElevenLabs speech out. Most of the engineering is about timing — a reply that arrives a beat late stops feeling like a conversation — so the pipeline is built around latency.",
     tags: ["ElevenLabs", "Realtime voice", "Conversational AI"],
     status: "live",
+    caps: ["voice", "agents"],
   },
   {
     title: "Evaluation Harness for AI Features",
@@ -292,6 +317,7 @@ export const MORE_WORK: WorkItem[] = [
     body: "A domain eval set with automated scoring, wired into the delivery pipeline, so a prompt change, model swap or new quantization can't ship if it makes the task worse. It turned “it feels better” into a number the team could discuss.",
     tags: ["Eval harness", "LLM-as-judge", "CI"],
     status: "live",
+    caps: ["evaluation"],
   },
   {
     title: "Agentic Workflow Automation",
@@ -299,6 +325,7 @@ export const MORE_WORK: WorkItem[] = [
     body: "A multi-agent system that plans a task, calls the tools it needs and pauses at set checkpoints for a person to decide. The escalation points are explicit, so the agent knows what it isn't allowed to finish on its own.",
     tags: ["Multi-agent", "Tool calling", "Human-in-the-loop"],
     status: "live",
+    caps: ["agents"],
   },
   {
     title: "AI-Led Security Engagement",
@@ -306,6 +333,7 @@ export const MORE_WORK: WorkItem[] = [
     body: "An authorised penetration test run through the harness — the model handling recon and targeted test generation, with every finding reproduced before it reached the client. Delivered ranked, with fixes attached and a re-test to confirm them.",
     tags: ["Pentesting", "AI-driven tooling", "Remediation"],
     status: "live",
+    caps: ["security"],
   },
   {
     title: "Workflow Automation with n8n",
@@ -313,6 +341,7 @@ export const MORE_WORK: WorkItem[] = [
     body: "AI steps added to the workflows a business already runs on. n8n handles triggers, integrations and retries; the model does only the part that needs a model. Much of the value was deciding which steps should never be an LLM call.",
     tags: ["n8n", "Workflow automation", "Integrations"],
     status: "live",
+    caps: ["agents"],
   },
   {
     title: "Conversational Product Assistant",
@@ -320,6 +349,7 @@ export const MORE_WORK: WorkItem[] = [
     body: "Built the company's product site and embedded an AI assistant into the core product, so users get answers in context without leaving the interface.",
     tags: ["Chatbot", "Product integration", "Full-stack"],
     status: "live",
+    caps: ["retrieval"],
   },
   {
     title: "Applied AI Delivery Programme",
@@ -327,6 +357,7 @@ export const MORE_WORK: WorkItem[] = [
     body: "Led a team of six through adopting modern AI workflows and tooling while delivering three full-stack AI projects to production.",
     tags: ["Team lead", "AI workflows", "Delivery"],
     status: "live",
+    caps: [],
   },
   {
     title: "Client RAG & Assistant Builds",
@@ -334,6 +365,7 @@ export const MORE_WORK: WorkItem[] = [
     body: "Ongoing freelance work: retrieval systems, domain chatbots and end-to-end AI implementations, scoped and delivered directly with each client.",
     tags: ["RAG", "Consulting", "End-to-end"],
     status: "live",
+    caps: ["retrieval"],
   },
 ];
 
@@ -578,3 +610,164 @@ export const FAQ = [
     a: "By email at Ajiththaduri1@gmail.com, on LinkedIn at linkedin.com/in/ajiththaduri, or on GitHub as AjithThaduri. He usually replies within a day.",
   },
 ];
+
+export const WORK_INDEX = {
+  title: "Work",
+  headline: "Everything I've built, in one place.",
+  lede: "Four systems I've written up in depth, and a longer list of projects and engagements. Filter by the kind of work you're interested in.",
+};
+
+export type Capability = {
+  slug: Cap;
+  title: string;
+  /** One plain sentence for newcomers. */
+  plain: string;
+  /** What I actually do in this area — two or three sentences. */
+  body: string;
+  points: string[];
+};
+
+export const CAPABILITIES: Capability[] = [
+  {
+    slug: "retrieval",
+    title: "Retrieval & documents",
+    plain: "Getting AI to answer from your own documents — accurately, with sources — instead of from memory.",
+    body: "Most of the AI systems I build start with documents: medical records, claims, internal manuals. The hard part is rarely the model. It's parsing messy files, splitting them sensibly, finding the right passages, and making sure every answer can point back to where it came from.",
+    points: [
+      "Layout-aware parsing and OCR for scanned and structured documents",
+      "Chunking strategies matched to the document, not one size for all",
+      "Hybrid search, reranking and citation-grounded answers",
+      "Retrieval evaluation — measuring whether the right passages come back",
+    ],
+  },
+  {
+    slug: "agents",
+    title: "Agents & automation",
+    plain: "AI that can plan steps and use tools to finish a task — with a person in the loop where it matters.",
+    body: "I build agents that do real work — calling tools, querying systems, moving tasks along — with explicit checkpoints where a human decides. I'm just as interested in which steps should never be an LLM call, and often the right answer is a plain workflow with one model step inside it.",
+    points: [
+      "Multi-agent orchestration, tool calling and plan-and-execute",
+      "Human-in-the-loop checkpoints and escalation rules",
+      "Workflow automation with n8n where a full agent is overkill",
+      "MCP and function-calling integrations with existing systems",
+    ],
+  },
+  {
+    slug: "guardrails",
+    title: "Privacy & guardrails",
+    plain: "Keeping sensitive data safe and stopping AI from saying things it shouldn't.",
+    body: "In healthcare, legal and government work, where data goes matters more than which model you use. I design systems where sensitive data is separated by architecture — so a bad prompt can't route around it — with checks on what goes in and what comes out.",
+    points: [
+      "PHI / PII detection, tokenization and re-identification on read",
+      "Two-zone architectures that keep identified data away from hosted models",
+      "Prompt-injection defense, including injection through retrieved content",
+      "Structured output enforcement, audit logging and role-based access",
+    ],
+  },
+  {
+    slug: "models",
+    title: "Models & serving",
+    plain: "Running AI models on your own hardware when sending data to an outside service isn't an option.",
+    body: "When cost, latency or data residency rule out a hosted API, I adapt, compress and serve open-weights models myself — and keep an eval set that proves the compressed model still does the job.",
+    points: [
+      "LoRA / QLoRA fine-tuning on a single-GPU budget",
+      "AWQ, GPTQ and GGUF quantization, compared on the real task",
+      "vLLM and llama.cpp serving, batching and caching",
+      "Model routing — small model first, large model only when needed",
+    ],
+  },
+  {
+    slug: "voice",
+    title: "Voice & realtime",
+    plain: "AI you can talk to, that answers fast enough to feel like a conversation.",
+    body: "Voice agents live or die on timing. I build pipelines around a latency budget — speech in, reasoning and tools in the middle, speech out — with turn-taking and interruption handled properly.",
+    points: [
+      "Speech-to-text, reasoning and ElevenLabs speech out",
+      "Streaming end to end, with a latency budget per stage",
+      "Turn-taking and barge-in",
+      "Tool calls mid-conversation without awkward silence",
+    ],
+  },
+  {
+    slug: "security",
+    title: "Security testing with AI",
+    plain: "Using AI to find security holes in software — including in other AI products — and proving each one is real.",
+    body: "I built an AI-driven penetration testing harness that reasons about the specific application, reproduces every finding before reporting it, and has a dedicated module for AI features. It only ever runs with written authorisation.",
+    points: [
+      "Agentic test generation aimed at the specific target",
+      "Automatic reproduction so reports contain no noise",
+      "Testing AI features: injection, tool misuse, agent reach",
+      "Impact-ranked findings, fixes attached, re-tests to confirm",
+    ],
+  },
+  {
+    slug: "evaluation",
+    title: "Evaluation",
+    plain: "Measuring whether an AI system is actually getting better — with numbers, not impressions.",
+    body: "Every serious system I build carries an eval set. It turns 'this prompt feels better' into a number, and it's what lets a team change models, prompts or quantization without fear.",
+    points: [
+      "Domain eval sets built from real cases",
+      "LLM-as-judge with rubrics, checked against human grading",
+      "Retrieval metrics alongside answer quality",
+      "Evals wired into CI so regressions can't ship",
+    ],
+  },
+];
+
+export const ENGAGE = {
+  title: "Working with me",
+  headline: "How a project with me usually goes.",
+  lede: "Every project is different, but most follow the same shape. Here's what to expect — and what I'll need from you.",
+  engagements: [
+    {
+      title: "Architecture review",
+      length: "1–2 weeks",
+      body: "I look at what you have or what you're planning, and write up what I'd keep, change and avoid — with a diagram and a prioritised list.",
+    },
+    {
+      title: "Build",
+      length: "Several weeks to months",
+      body: "I design and build the system with your team, from first prototype to production, and hand it over with documentation and an eval set.",
+    },
+    {
+      title: "Security test",
+      length: "1–3 weeks",
+      body: "An authorised, AI-driven penetration test of your product or AI feature, with ranked findings, fixes and a re-test.",
+    },
+    {
+      title: "Training",
+      length: "1 day to 6 months",
+      body: "Hands-on workshops or longer programmes for your engineers. More on the teaching page.",
+    },
+  ],
+  process: [
+    { n: "01", title: "A conversation", body: "You tell me what you're trying to build and what's in the way. No preparation needed." },
+    { n: "02", title: "A short proposal", body: "Scope, approach, timeline and cost, in plain language — usually within a few days." },
+    { n: "03", title: "Architecture first", body: "We agree the design before much code is written, because that's where the expensive mistakes are." },
+    { n: "04", title: "Build in the open", body: "Regular demos, a shared eval set, and nothing hidden in a black box." },
+    { n: "05", title: "Handover", body: "Documentation, diagrams and the eval set stay with your team, so you're never dependent on me." },
+  ],
+  faq: [
+    { q: "Do you sign NDAs?", a: "Yes, routinely. It's why client names never appear on this site." },
+    { q: "Do you work remotely?", a: "Yes. I'm based in Hyderabad and work with teams across time zones, with a few hours of overlap each day." },
+    { q: "Can you work with our existing team?", a: "That's the usual setup. I'd rather leave your team stronger than leave you depending on me." },
+    { q: "Which models and clouds do you work with?", a: "Claude, OpenAI and open-weights models; AWS and GCP; on-prem when data can't leave. I'll recommend what fits, not what I prefer." },
+  ],
+  brief: {
+    title: "Tell me about your project",
+    lede: "Fill this in and it'll open as an email to me — nothing is stored on this site.",
+    types: ["Architecture review", "Build", "Security test", "Training", "Something else"],
+  },
+};
+
+export const BLUEPRINTS_INTRO = {
+  title: "Blueprints",
+  headline: "Open architectures you can build from.",
+  lede: "How I'd design common AI systems — retrieval over long or sensitive documents, agents, guardrails — written up in enough detail to use. Free to use and adapt; a link back is appreciated.",
+  types: {
+    blueprint: "My own design for a problem, detailed enough to build from.",
+    teardown: "My take on someone else's published method — what works, what breaks, how I'd adapt it.",
+    note: "A shorter opinion or lesson learned.",
+  },
+  license: "Text and diagrams are CC BY 4.0 — use them, adapt them, credit the source.",
+};

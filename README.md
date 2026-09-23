@@ -17,6 +17,11 @@ need to touch a component to change what the site says.
 | `/work/[slug]`           | Full case study per `FLAGSHIP` entry   | `FLAGSHIP`                      |
 | `/about`                 | Story, model work, tools, FAQ          | `ABOUT`, `MODEL`, `STACK`, `FAQ`|
 | `/teaching`              | Teaching stats, programmes, topics     | `TEACHING`                      |
+| `/work`                  | Every project, filterable              | `WORK_INDEX` + `caps` on each   |
+| `/capabilities/[slug]`   | Seven capability hubs                  | `CAPABILITIES`                  |
+| `/work-with-me`          | Engagements, process, project brief    | `ENGAGE`                        |
+| `/blueprints`            | Intro text (articles are MDX, below)   | `BLUEPRINTS_INTRO`              |
+| `/glossary`              | Plain-language AI terms                | `lib/glossary.ts`               |
 
 ### Adding a project
 
@@ -28,10 +33,29 @@ greyed out with a "DRAFT SLOT — FILL IN" label; `SHOW_DRAFTS = false` hides th
 A new flagship case study is a new `FLAGSHIP` entry with a unique `slug` — its
 page at `/work/<slug>` is generated automatically.
 
+### Writing a blueprint
+
+Blueprints are long-form articles, so they live as MDX in
+`content/blueprints/<slug>.mdx` rather than in `lib/content.ts`. The
+frontmatter fields are documented at the top of `lib/blueprints.ts`.
+
+- `draft: true` shows the article locally and on Vercel preview deploys, with a
+  "Draft — awaiting review" banner, and hides it on production. Remove the
+  line (or set `false`) once every technical claim has been checked.
+- `status` is a promise to the reader: `production` only if it has run in a
+  live system.
+- Building blocks available inside MDX: `<Flow>` (interactive diagram, exports
+  Mermaid), `<Tradeoffs>` (comparison table), `<Steps>`/`<Step>`,
+  `<Callout tone="note|tip|warn">`, and `<Term id="rag">RAG</Term>` for glossary
+  tooltips (ids from `lib/glossary.ts`). Fenced code blocks are highlighted.
+- Every article gets its own share image, a raw-Markdown copy at
+  `/blueprints/<slug>/raw`, an RSS entry, sitemap entry and `llms.txt` line.
+- Blueprints are the one place dates appear on the site.
+
 ### House rules the copy follows
 
 - Sectors, never client or employer names.
-- No dates, no tenure, no years, anywhere.
+- No dates, no tenure, no years — except publish dates on blueprints.
 - Nothing claimed that has not actually shipped.
 - Voice: first person, calm and specific — detail over adjectives.
 

@@ -46,5 +46,18 @@ export const Help = () => (
         </span>
       </Link>
     </Reveal>
+
+    <Reveal>
+      <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm">
+        <Link href="/work-with-me" className="group inline-flex items-center gap-2 font-medium text-text hover:text-accent">
+          How a project with me works
+          <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+        </Link>
+        <Link href="/work#capabilities" className="group inline-flex items-center gap-2 text-muted hover:text-text">
+          Browse by capability
+          <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+        </Link>
+      </div>
+    </Reveal>
   </Section>
 );

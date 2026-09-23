@@ -6,7 +6,7 @@ import { Section, SectionHead } from "./Section";
 const legendColours = ["var(--accent-vivid)", "var(--flag)", "var(--teal)"];
 
 export const Principles = () => (
-  <Section id="approach">
+  <Section id="approach" className="border-t border-line">
     <SectionHead eyebrow={PRINCIPLES.title} title={PRINCIPLES.lede} />
 
     {/* The live illustration: messy input, one checkpoint, structured output. */}

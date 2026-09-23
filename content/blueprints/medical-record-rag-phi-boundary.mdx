@@ -1,0 +1,107 @@
+---
+title: "RAG over medical records, with a PHI boundary the prompt can't cross"
+summary: "A way to let a powerful hosted model reason over medical records without it ever seeing who the patient is — by removing identity before anything is indexed, and restoring it only for authorised readers at the very end."
+type: blueprint
+level: advanced
+status: production
+topics: ["retrieval", "guardrails"]
+related: medical-legal-intelligence
+published: 2026-09-23
+draft: true
+---
+
+The best reasoning models are hosted. Identified medical records, in most setups, can't be sent to them. Teams usually resolve that tension with a policy — "don't put names in the prompt" — and a hope that nobody forgets.
+
+This design resolves it with structure instead. Identity is removed before anything is embedded or indexed, and it's restored only at the presentation layer, for people allowed to see it. The hosted model reasons over the whole case and never learns who it's about. It's the shape I used in the [medical-legal intelligence platform](/work/medical-legal-intelligence).
+
+## The architecture
+
+<Flow
+  title="Two zones"
+  zones={[
+    { id: "secure", label: "Secure PHI zone", tone: "teal" },
+    { id: "reason", label: "Reasoning zone", tone: "accent" },
+  ]}
+  stages={[
+    { id: "ingest", label: "Ingest & OCR", zone: "secure", detail: "Records arrive as PDFs, scans, faxes and exports. OCR and layout parsing happen inside the secure zone, because raw pages are full of identifiers." },
+    { id: "detect", label: "Detect PHI", note: "two detectors", zone: "secure", detail: "A clinical NER model plus pattern rules for structured identifiers — MRNs, phone numbers, addresses, account numbers. Two methods, because each misses things the other catches." },
+    { id: "tokenize", label: "Tokenize", note: "consistent per case", zone: "secure", detail: "Replace each identifier with a stable placeholder — the same patient is [PATIENT_1] on every page of the case. The real values go into an encrypted vault that lives only in this zone." },
+    { id: "dates", label: "Shift dates", note: "one offset per patient", zone: "secure", detail: "Move every date for a patient by the same random offset. Absolute dates disappear; the intervals between events — which timelines depend on — survive intact." },
+    { id: "validate", label: "Validate", note: "fail closed", zone: "secure", detail: "A second pass looks for anything that still resembles an identifier. If a chunk looks risky it's held back for review rather than passed on. When in doubt, it doesn't leave the zone." },
+    { id: "index", label: "Index", note: "de-identified only", zone: "secure", detail: "Only tokenized, date-shifted text is chunked, embedded and indexed. Embeddings of identified text can leak information, so they're never created." },
+    { id: "reason", label: "Retrieve & reason", zone: "reason", detail: "Retrieval runs over the de-identified index, and the hosted model reasons over placeholders. It can follow [PATIENT_1] across 400 pages without knowing who that is." },
+    { id: "reid", label: "Re-identify on read", note: "authorised users only", zone: "secure", detail: "At display time, placeholders are swapped back for real values — for users whose role allows it, with every lookup written to the audit log." },
+  ]}
+/>
+
+## The decisions that matter
+
+### Remove identity before embedding, not after
+It's tempting to index the raw text and redact only what goes into the prompt. Don't. Research has shown that text can be substantially reconstructed from its embeddings, so an index of identified embeddings is itself sensitive data. Tokenize first, and the index never contains anything you'd need to protect.
+
+### Keep placeholders consistent across the whole case
+If the patient is [PATIENT_1] on page 3 and [PERSON_7] on page 200, the model can't connect them and the analysis falls apart. Mapping is per case: one real value, one placeholder, everywhere it appears — including across different spellings and nicknames, which is where most of the work is.
+
+```python
+class CaseTokenizer:
+    """One placeholder per real value, stable across a whole case."""
+
+    def __init__(self, case_id, vault):
+        self.case_id, self.vault = case_id, vault
+        self.seen = {}                          # normalised value -> placeholder
+        self.counts = {}
+
+    def placeholder(self, value, kind):
+        key = (kind, normalise(value))          # "Dr. J. Smith" ~ "John Smith"
+        if key not in self.seen:
+            n = self.counts[kind] = self.counts.get(kind, 0) + 1
+            token = f"[{kind}_{n}]"
+            self.seen[key] = token
+            self.vault.put(self.case_id, token, value)   # encrypted, audited
+        return self.seen[key]
+```
+
+### Shift dates, don't delete them
+Clinical and legal analysis runs on time: onset, treatment, gaps in care. Deleting dates destroys that. Shifting every date for a patient by the same offset keeps the intervals exact while removing the real calendar.
+
+<Callout tone="warn" title="Check this with whoever owns compliance">
+Strict HIPAA Safe Harbor removes all dates more specific than the year. Shifting keeps intervals, which is why it's useful — but it means you're relying on your compliance approach (often an Expert Determination) rather than Safe Harbor alone. Make that decision deliberately, with the person accountable for it.
+</Callout>
+
+### Validate, and fail closed
+No detector catches everything. Free text is full of identifiers that don't look like identifiers: "her daughter, a nurse at the county hospital". A second pass with a different method catches much of what the first missed, and anything that still looks risky is held back rather than sent on. A pipeline that fails open will, eventually, leak.
+
+### Check what comes out, too
+Models sometimes invent plausible names or details. The output guard checks responses for anything identifier-shaped that isn't a known placeholder, before re-identification runs.
+
+## What the reasoning zone sees
+
+<Tradeoffs
+  columns={["Identity protected", "Reasoning quality", "Timeline intact", "Effort"]}
+  rows={[
+    { name: "Raw records to hosted model", cells: [0, 3, 3, 3], best: "Never, for identified records" },
+    { name: "Redact at prompt time only", cells: [1, 3, 3, 2], best: "Low-risk data; the index is still sensitive" },
+    { name: "Delete identifiers and dates", cells: [3, 1, 0, 2], best: "Statistics, where individual cases don't matter" },
+    { name: "Two-zone, tokenize + shift (this design)", cells: [3, 3, 3, 1], best: "Case-level analysis of identified records" },
+  ]}
+  caption="'Effort': more dots means less work. The two-zone design costs the most to build — the point is that it's the only row with all three properties."
+/>
+
+## How to test it
+
+- **PHI recall, measured.** Annotate a sample of real records by hand and measure how many identifiers the pipeline catches. Recall matters far more than precision here — a false positive costs a little readability; a false negative is a disclosure.
+- **Leakage tests.** Search the index and model inputs for known identifiers from the test set. The expected number is zero.
+- **Consistency tests.** The same person should get the same placeholder across every document in a case, including misspellings.
+- **Analysis quality.** Run the same eval questions on de-identified and (in a secure test environment) identified text. If de-identification hurts the analysis, look at placeholder consistency first.
+
+## Things that go wrong
+
+- **OCR errors hide identifiers.** "J0hn Sm1th" gets past a name detector. Detect on the cleaned text *and* check low-confidence OCR regions more aggressively.
+- **Quasi-identifiers.** A rare condition plus a small town plus an occupation can identify someone with no name at all. Decide which fields to generalise, not just which to remove.
+- **The vault becomes the weak point.** It holds every real value. Encrypt it, give it its own access controls, and log every read.
+
+## Sources and further reading
+
+- U.S. HHS — *Guidance Regarding Methods for De-identification of PHI* (Safe Harbor and Expert Determination)
+- Morris et al. — *Text Embeddings Reveal (Almost) As Much As Text* (2023)
+- Microsoft Presidio — open-source PII detection and anonymisation

@@ -1,0 +1,108 @@
+---
+title: "RAG for long documents: a map, not a pile of chunks"
+summary: "Ordinary RAG handles 'find me the paragraph' well and 'what does this 400-page file say overall' badly. This design gives the system a map of the document so it can answer both."
+type: blueprint
+level: advanced
+status: tested
+topics: ["retrieval"]
+published: 2026-09-23
+draft: true
+---
+
+Standard <Term id="rag">RAG</Term> treats a document as a pile of interchangeable chunks. Ask a question, pull the eight most similar pieces, hand them to the model. For a short document, or a question with a single answer in a single place, that works.
+
+It falls apart on long documents — a 400-page medical record, a contract with its schedules, a technical manual — because many real questions aren't about one place:
+
+- **Global questions:** "What was the overall course of treatment?" No single chunk contains the answer.
+- **Cross-reference questions:** "Does the exclusion in section 9 apply to the case in schedule C?" The answer needs two distant parts read together.
+- **Where-is-it questions:** "Which section covers termination?" The answer is about the document's structure, which chunking threw away.
+
+The fix is to keep the structure and give the system a map.
+
+## The architecture
+
+<Flow
+  title="Long-document pipeline"
+  zones={[
+    { id: "ingest", label: "Ingestion (once per document)", tone: "teal" },
+    { id: "query", label: "Query time", tone: "accent" },
+  ]}
+  stages={[
+    { id: "parse", label: "Parse", note: "layout-aware", zone: "ingest", detail: "Extract text with its structure intact: headings, heading levels, page numbers, tables and lists. Scanned pages go through OCR first. Everything later depends on this being good." },
+    { id: "tree", label: "Build the tree", note: "doc → section → passage", zone: "ingest", detail: "Turn the heading hierarchy into a tree. Each node knows its parent, its children, its page range and its position in reading order." },
+    { id: "summarise", label: "Summarise bottom-up", note: "one per node", zone: "ingest", detail: "Summarise each passage group, then summarise the summaries up the tree, ending with a document-level summary. These are what global questions get answered from." },
+    { id: "index", label: "Index both levels", note: "hybrid", zone: "ingest", detail: "Index leaf passages and node summaries together, with vector and keyword search. Each entry keeps a pointer back to its node in the tree." },
+    { id: "route", label: "Route the question", note: "local or global?", zone: "query", detail: "A small classifier or a cheap model call decides whether the question is local (one place), cross-reference (a few places) or global (the whole document). Each takes a different retrieval path." },
+    { id: "retrieve", label: "Retrieve & drill down", zone: "query", detail: "Global questions start from summaries. Local ones start from passages. Either way, a hit on a summary can expand into its children when detail is needed." },
+    { id: "assemble", label: "Assemble in order", note: "with breadcrumbs", zone: "query", detail: "Sort retrieved pieces by their position in the document, not by score, and label each with its section path and pages. The model reads a coherent excerpt rather than a shuffled pile." },
+    { id: "answer", label: "Answer with citations", zone: "query", detail: "The model answers from the assembled context and cites section and page for each claim. Claims without a citation are flagged or dropped." },
+  ]}
+/>
+
+## Why each piece is there
+
+### Keep the structure the document already has
+Long documents are almost always organised: chapters, sections, schedules, dated entries. That organisation is information — it tells you what belongs together and where things are. A layout-aware parser that keeps headings and page numbers is the foundation. If your parser flattens everything to text, fix that first.
+
+### Summaries answer the questions chunks can't
+A global question needs a view of the whole. Summarising bottom-up gives you that view at every level: a summary per section, per chapter, and for the document. This is close to the RAPTOR approach — recursive summarisation into a tree — except that for well-structured documents I build the tree from the document's own headings rather than by clustering.
+
+### Routing avoids doing everything for every question
+Most questions are local. Sending every question down the expensive global path wastes tokens and often answers worse, because summaries lose detail. A cheap routing step keeps simple questions simple.
+
+### Order matters more than people expect
+Retrieval returns pieces ranked by similarity. If you paste them into the prompt in that order, the model reads events out of sequence and references before the thing they refer to. Re-sorting by document position, with a breadcrumb on each piece, is one of the cheapest quality gains in this design.
+
+<Callout tone="note" title="Build the eval set around global questions too">
+Most RAG eval sets are full of "find the fact" questions, because they're easy to write. Make sure a third of yours are global or cross-reference questions — otherwise you'll never see the failures this design exists to fix.
+</Callout>
+
+## When not to build this
+
+Context windows are large now. If a document fits comfortably in one, and you'll ask it only a handful of questions, just give the model the whole thing — with prompt caching if you'll ask more than once. It's simpler and it often answers better.
+
+<Tradeoffs
+  columns={["Global questions", "Local precision", "Cost per query", "Simplicity"]}
+  rows={[
+    { name: "Flat chunk RAG", cells: [1, 3, 3, 3], best: "Short documents, fact-lookup questions" },
+    { name: "Hierarchical (this design)", cells: [3, 3, 2, 1], best: "Long, structured documents queried often" },
+    { name: "Whole document in context", cells: [3, 2, 1, 3], best: "Fits in the window; few questions per document" },
+    { name: "Map-reduce summarisation", cells: [3, 1, 1, 2], best: "One-off reports over very long material" },
+  ]}
+  caption="'Cost per query': more dots means cheaper. Whole-document context gets much cheaper with prompt caching if the same document is queried repeatedly."
+/>
+
+The hierarchical design earns its complexity when documents are long, structured and queried many times — a case file an attorney returns to for weeks, a manual thousands of employees search.
+
+## A sketch of the query path
+
+```python
+def answer(question, doc_id):
+    kind = route(question)                  # "local" | "cross_ref" | "global"
+
+    if kind == "global":
+        nodes = search(question, doc_id, level="summary", k=6)
+    elif kind == "cross_ref":
+        nodes = search(question, doc_id, level="any", k=12)
+        nodes = expand_to_sections(nodes)   # read whole sections, not fragments
+    else:
+        nodes = search(question, doc_id, level="passage", k=8)
+
+    nodes = sorted(dedupe(nodes), key=lambda n: n.position)
+    context = "\n\n".join(
+        f"[{n.section_path} · p.{n.pages}]\n{n.text}" for n in nodes
+    )
+    return generate_with_citations(question, context)
+```
+
+## Things that go wrong
+
+- **Summaries that drift.** A summary can state something the source doesn't. Keep summaries extractive where you can, and always let a summary hit expand to its source text before the final answer.
+- **Bad parsing, silently.** A missed heading merges two sections; a table read row-by-row becomes nonsense. Spot-check parser output on real files before tuning anything else.
+- **Re-summarising on every change.** When a document is updated, only rebuild the summaries on the path from the changed node to the root.
+
+## Sources and further reading
+
+- Sarthi et al. — *RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval* (2024)
+- LlamaIndex documentation on hierarchical and auto-merging retrieval
+- Anthropic and OpenAI documentation on prompt caching, for the whole-document alternative

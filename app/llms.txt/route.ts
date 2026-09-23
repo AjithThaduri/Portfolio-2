@@ -10,7 +10,9 @@ import {
   TEACHING,
   STACK,
   FAQ,
+  CAPABILITIES,
 } from "@/lib/content";
+import { getAllBlueprints } from "@/lib/blueprints";
 
 /* https://llmstxt.org — a plain-markdown summary for language models and
    agents that fetch the site. Generated from the same content the page uses,
@@ -65,6 +67,21 @@ export function GET() {
     lines.push(`- Built with: ${p.stack.join(", ")}`);
     lines.push("");
   }
+
+  const blueprints = getAllBlueprints().filter((b) => !b.draft);
+  if (blueprints.length) {
+    lines.push("## Blueprints (open architectures, CC BY 4.0)");
+    lines.push("");
+    for (const b of blueprints) {
+      lines.push(`- [${b.title}](${SITE.url}/blueprints/${b.slug}) — ${b.summary} Markdown: ${SITE.url}/blueprints/${b.slug}/raw`);
+    }
+    lines.push("");
+  }
+
+  lines.push("## Capabilities");
+  lines.push("");
+  for (const c of CAPABILITIES) lines.push(`- [${c.title}](${SITE.url}/capabilities/${c.slug}) — ${c.plain}`);
+  lines.push("");
 
   lines.push("## Also built");
   lines.push("");

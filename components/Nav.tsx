@@ -32,7 +32,7 @@ export const Nav = () => {
     pathname === "/" && href.startsWith("/#") ? href.slice(1) : href;
   const isActive = (href: string) =>
     href.startsWith("/#") ? false : pathname === href || pathname.startsWith(`${href}/`);
-  const onWork = pathname.startsWith("/work/");
+  const onWork = pathname.startsWith("/work/") || pathname.startsWith("/capabilities/");
 
   return (
     <>
@@ -58,7 +58,7 @@ export const Nav = () => {
             Ajith Thaduri
           </Link>
 
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
             {NAV.map((l) => {
               const active = isActive(l.href) || (l.label === "Work" && onWork);
               return (
@@ -74,6 +74,7 @@ export const Nav = () => {
                 </Link>
               );
             })}
+            <SearchButton />
             <ThemeToggle className="mx-1" />
             <a
               href="#contact"
@@ -83,7 +84,8 @@ export const Nav = () => {
             </a>
           </nav>
 
-          <div className="flex items-center gap-1 md:hidden">
+          <div className="flex items-center gap-1 lg:hidden">
+            <SearchButton compact />
             <ThemeToggle className="relative z-50" />
             <button
               type="button"
@@ -114,9 +116,9 @@ export const Nav = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 flex flex-col justify-center bg-ink px-8 md:hidden"
+            className="fixed inset-0 z-40 flex flex-col justify-center bg-ink px-8 lg:hidden"
           >
-            {[...NAV, { label: "Contact", href: "#contact" }].map((l, i) => (
+            {[...NAV, { label: "Working with me", href: "/work-with-me" }, { label: "Contact", href: "#contact" }].map((l, i) => (
               <motion.div
                 key={l.href}
                 initial={{ opacity: 0, y: 14 }}
@@ -126,7 +128,7 @@ export const Nav = () => {
                 <Link
                   href={resolve(l.href)}
                   onClick={() => setOpen(false)}
-                  className="flex items-baseline gap-5 border-b border-line py-5 text-4xl font-medium tracking-tight text-text"
+                  className="flex items-baseline gap-5 border-b border-line py-4 text-3xl font-medium tracking-tight text-text sm:text-4xl"
                 >
                   <span className="font-mono text-xs text-accent">
                     {String(i + 1).padStart(2, "0")}
@@ -148,3 +150,27 @@ export const Nav = () => {
     </>
   );
 };
+
+const SearchButton = ({ compact = false }: { compact?: boolean }) => (
+  <button
+    type="button"
+    onClick={() => window.dispatchEvent(new Event("open-palette"))}
+    aria-label="Search the site"
+    className={
+      compact
+        ? "relative z-50 flex h-10 w-10 items-center justify-center text-muted hover:text-text"
+        : "ml-1 inline-flex items-center gap-2 rounded-full border border-line py-1.5 pl-3 pr-1.5 text-sm text-faint transition-colors hover:border-faint hover:text-text"
+    }
+  >
+    <svg aria-hidden width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+    {!compact && (
+      <>
+        Search
+        <kbd className="rounded-full bg-surface px-2 py-0.5 font-mono text-[10px]">⌘K</kbd>
+      </>
+    )}
+  </button>
+);

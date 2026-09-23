@@ -130,6 +130,19 @@ body {
   border-radius: 2px;
 }
 
+/* Code highlighting (sugar-high) — mapped onto the theme tokens. */
+:root {
+  --sh-class: var(--teal);
+  --sh-identifier: var(--text);
+  --sh-sign: var(--faint);
+  --sh-property: var(--teal);
+  --sh-entity: var(--accent);
+  --sh-jsxliterals: var(--muted);
+  --sh-string: var(--accent);
+  --sh-keyword: var(--flag);
+  --sh-comment: var(--faint);
+}
+
 /* Soft warm light behind page heads. Two blurred discs, theme-aware. */
 .glow {
   position: absolute;

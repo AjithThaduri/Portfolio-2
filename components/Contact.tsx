@@ -68,7 +68,14 @@ export const Contact = () => (
           </p>
         </Reveal>
         <Reveal delay={0.14}>
-          <ul className="mt-10 flex flex-wrap gap-3">
+          <Link
+            href="/work-with-me#brief"
+            className="group mt-8 inline-flex items-center gap-2 text-sm font-medium text-text transition-colors hover:text-accent"
+          >
+            Prefer a short form? Send a project brief
+            <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+          </Link>
+          <ul className="mt-8 flex flex-wrap gap-3">
             {CONTACT.availability.map((a) => (
               <li
                 key={a.text}
@@ -129,11 +136,18 @@ export const Footer = () => (
         <span>{SITE.location}</span>
       </div>
       <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
-        {NAV.map((l) => (
+        {[
+          ...NAV,
+          { label: "Working with me", href: "/work-with-me" },
+          { label: "Glossary", href: "/glossary" },
+        ].map((l) => (
           <Link key={l.href} href={l.href} className="transition-colors hover:text-text">
             {l.label}
           </Link>
         ))}
+        <a href="/blueprints/rss.xml" className="transition-colors hover:text-text">
+          RSS
+        </a>
         <a href="#top" className="transition-colors hover:text-text">
           Back to top ↑
         </a>
