@@ -18,6 +18,7 @@ export type BlueprintMeta = {
   readingMinutes: number;
   changelog: { date: string; note: string }[];
   repos: { repo: string; note: string }[];
+  code?: string;
 };
 
 export const TYPE_LABEL: Record<BlueprintType, string> = {
@@ -41,3 +42,6 @@ export const formatDate = (iso: string) =>
   });
 
 export const SITE_LICENSE = "CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)";
+
+/** Companion repository with runnable code for every blueprint. */
+export const CODE_REPO = "https://github.com/AjithThaduri/blueprints";

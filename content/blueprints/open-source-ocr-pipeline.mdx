@@ -5,7 +5,8 @@ type: blueprint
 status: tested
 topics: ["retrieval", "models"]
 published: 2026-09-23
-draft: true
+draft: false
+code: src/blueprints/ocr
 repos:
   - repo: allenai/olmocr
     note: "olmOCR toolkit and olmOCR-Bench; a strong escalation-tier model."
@@ -31,14 +32,16 @@ repos:
     note: "Serving runtime most of these models support."
 changelog:
   - date: 2026-09-23
-    note: First draft.
+    note: First published.
 ---
 
 <Term id="ocr">OCR</Term> is where document AI loses accuracy without anyone noticing. The output looks like text, so it gets indexed, and the problem only shows up weeks later as retrieval that keeps missing things.
 
 Open-source OCR has changed a lot in two years. Document models of around a billion parameters now sit at the top of the public benchmarks, ahead of general models many times their size, and they run on one GPU. But the accurate models are far slower than the simple ones, and most pages don't need them.
 
-<FieldNote prompt="Which OCR tools have you actually run on real documents, on what hardware, and what made you move off the first one?" />
+<FieldNote title="In production">
+Use CPU text extraction for born-digital pages and save GPU models for pages that need them. The gap is large: Marker publishes 23.7 pages a second on CPU without OCR, against 2.9 in its balanced OCR mode, and Docling measured about 1.3 pages a second on an M3 Max CPU. Move off Tesseract-class engines when tables, multi-column layouts or old scans matter. That's where vision-language models now lead, at olmOCR's published cost of $176 per million pages.
+</FieldNote>
 
 ## The pipeline
 
@@ -69,7 +72,9 @@ In a typical corpus most pages are born-digital, so OCR only adds errors to them
 Old scanners often embed an invisible, badly OCR'd text layer behind the image. Score the text layer before trusting it.
 </Callout>
 
-<FieldNote prompt="On a real corpus, roughly what share of pages went down each path? What surprised you about the mix?" />
+<FieldNote title="In production">
+Expect a substantial scanned minority, not a clean split. In Hugging Face's FinePDFs web-scale crawl, about 29% of documents were sent to OCR; enterprise archives will differ, often upwards. Detection doesn't need a large model. FinePDFs used a small XGBoost classifier over eight sampled pages, Marker re-OCRs a page when any of its embedded text looks garbled, and Docling OCRs only the layout regions not backed by real PDF text. The companion code's `text_layer_quality` is the cheap version of this.
+</FieldNote>
 
 ## Picking tools for each tier
 
@@ -97,7 +102,9 @@ For the model tiers, the names I'd look at first: **PaddleOCR-VL** and **GLM-OCR
 
 **Keep the big model rare.** AllenAI put olmOCR 2 at under $200 per million pages on their hardware. In a routed pipeline only a fraction of pages ever reach that tier.
 
-<FieldNote prompt="A document type that beat every model you tried. What was it, and what did you do in the end?" />
+<FieldNote title="In production">
+Old and low-quality scans remain the weakest category by a wide margin. On olmOCR-Bench's old-scans split, leading systems score roughly 29 to 50, against 94 to 100 on clean pages. Tables come next, ranging from about 61 to 88 across the leaders. OmniDocBench flags handwriting, newspapers, blurry scans, watermarks and rotated pages as its hard cases. If your corpus contains these, benchmark on them specifically; overall scores hide them.
+</FieldNote>
 
 ## The router, sketched
 
@@ -140,3 +147,5 @@ def text_quality(text, page):
 - Datalab, Marker and Surya benchmark tables (vendor-reported)
 - IBM, Docling and the granite-docling model card
 - Tesseract docs, *Improving the quality of the output*
+- Hugging Face, *FinePDFs* dataset write-up (2025)
+- Docling technical report (2024)

@@ -5,7 +5,8 @@ type: blueprint
 status: tested
 topics: ["retrieval"]
 published: 2026-09-23
-draft: true
+draft: false
+code: src/blueprints/chunking.py
 repos:
   - repo: docling-project/docling
     note: "Structure-aware parsing of PDFs and Office files into clean sections and tables."
@@ -21,12 +22,14 @@ repos:
     note: "Retrieval and answer metrics for comparing chunking changes."
 changelog:
   - date: 2026-09-23
-    note: First draft.
+    note: First published.
 ---
 
 When a <Term id="rag">RAG</Term> system gives a bad answer, I check the chunks before I touch the prompt. More often than not the passage that answers the question exists, but it was split in half, or buried inside a chunk about three other things, or separated from the heading that said what it was about.
 
-<FieldNote prompt="Describe one retrieval bug you traced back to chunking. What kind of document was it (keep it generic), what went wrong, and how did you find it?" />
+<FieldNote title="In production">
+Chunking failures rarely look like chunking failures. The *Seven Failure Points* paper (Barnett et al., 2024) describes the symptoms instead: the right document ranked below the cut-off, the answer missing from the retrieved context, or an incomplete answer. To find the cause, take the questions your eval set misses, open the chunk that should have matched, and look at where it starts and ends. A table cut in half or a paragraph separated from its heading usually turns up within the first ten misses.
+</FieldNote>
 
 ## The trade-off
 
@@ -84,7 +87,9 @@ Every strategy below is a different way of getting out of that trade-off.
 
 **Late chunking.** Embed the whole document with a long-context model, then pool token vectors into chunks, so each chunk's vector has seen the rest of the document. No extra model calls, but you need an embedding model that supports it.
 
-<FieldNote prompt="Contextual headers or late chunking: which have you actually run? What did it cost at ingestion, and was the improvement worth it?" />
+<FieldNote title="In production">
+Contextual retrieval has the stronger evidence. Anthropic measured a 35% drop in top-20 retrieval failures from contextual embeddings alone, at about $1 per million document tokens with prompt caching. Late chunking's published gain is smaller, around 1.8 points of nDCG@10 on BEIR with 256-token chunks, but it needs no model calls. Use late chunking when ingestion cost or data policy rules out an LLM pass, and contextual retrieval when better retrieval is worth paying for.
+</FieldNote>
 
 ## Starting sizes
 
@@ -94,7 +99,9 @@ These are first guesses to measure against:
 - 10–20% overlap only when you split mid-text. None when you split on real boundaries.
 - Parents sized so that *k* of them fit comfortably in the <Term id="context-window">context window</Term> with room for the answer.
 
-<FieldNote prompt="On a real project, what chunk size and overlap did you end up with, and what did you start with?" />
+<FieldNote title="In production">
+Published evaluations agree on the extremes and disagree on the middle. NVIDIA found the best size varied by dataset (512 tokens for one, 1,024 for two others), with page-level chunks best on average. LlamaIndex found 1,024 best on their test. Chroma found 200-token chunks without overlap more efficient than 400. Very small (128) and very large (2,048) chunks lose almost everywhere. Overlap mostly duplicates tokens: Chroma found removing it improved efficiency, and NVIDIA's small gain from 15% overlap came from a single dataset. Start around 256–512 tokens for lookup questions and 1,024 or a page for analytical ones, and let the eval set decide.
+</FieldNote>
 
 ## A sketch
 
@@ -134,3 +141,7 @@ Re-run the whole set on every chunking change. A change that helps one kind of q
 - Anthropic, *Introducing Contextual Retrieval* (2024)
 - Günther et al., *Late Chunking: Contextual Chunk Embeddings Using Long-Context Embedding Models* (Jina AI, 2024)
 - Qu et al., *Is Semantic Chunking Worth the Computational Cost?* (2024)
+- Barnett et al., *Seven Failure Points When Engineering a Retrieval Augmented Generation System* (2024)
+- NVIDIA, *Finding the Best Chunking Strategy for Accurate AI Responses* (2025)
+- Chroma, *Evaluating Chunking Strategies for Retrieval* (2024)
+- LlamaIndex, *Evaluating the Ideal Chunk Size for a RAG System* (2023)

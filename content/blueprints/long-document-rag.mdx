@@ -5,7 +5,8 @@ type: blueprint
 status: tested
 topics: ["retrieval"]
 published: 2026-09-23
-draft: true
+draft: false
+code: src/blueprints/longdoc.py
 repos:
   - repo: parthsarthi03/raptor
     note: "Official RAPTOR implementation: recursive summary trees."
@@ -19,7 +20,7 @@ repos:
     note: "Corpus-wide summarisation when questions span many documents."
 changelog:
   - date: 2026-09-23
-    note: First draft.
+    note: First published.
 ---
 
 Standard <Term id="rag">RAG</Term> treats a document as a bag of interchangeable chunks. That's fine for short documents and for questions with one answer in one place. Long documents (an annual report, a contract with schedules, a technical manual) get three kinds of question it handles badly:
@@ -28,7 +29,9 @@ Standard <Term id="rag">RAG</Term> treats a document as a bag of interchangeable
 - **Cross-reference:** "Does the exclusion in section 9 apply to schedule C?" Two distant parts need reading together.
 - **Structural:** "Which section covers termination?" The answer is the document's structure, which chunking discarded.
 
-<FieldNote prompt="What kind of long document did you first build this for (keep it generic), and which of these question types broke flat RAG first?" />
+<FieldNote title="In production">
+The evidence here is consistent. The GraphRAG paper states that RAG fails on global questions asked of a whole corpus. The Self-Route study found long context beat RAG by roughly 4 to 13 points across three models, and RAG's failures clustered in multi-step reasoning, broad or ambiguous questions, and implicit questions that need the whole document. Put those question types in your eval set before deciding whether you need this design.
+</FieldNote>
 
 ## The design
 
@@ -58,7 +61,9 @@ Four choices do most of the work.
 
 **Route, so simple questions stay simple.** Most questions are local. Sending them down the summary path costs more and often answers worse, because summaries drop detail.
 
-<FieldNote prompt="How did you route questions in practice: rules, a small classifier, or a model call? What did it get wrong?" />
+<FieldNote title="In production">
+Start with rules; a perfect classifier isn't required. Adaptive-RAG's classifier was right only about 54–66% of the time per class, yet matched the quality of always taking the multi-step path (F1 50.91 against 50.87), because per-query time ranged from 0.35 seconds without retrieval to 27 seconds multi-step. Self-Route found RAG and long context gave identical answers on 63% of queries, which is why routing saved 39–65% of tokens at a small quality cost. The savings come from avoiding the expensive path, not from classifying perfectly.
+</FieldNote>
 
 **Re-sort by position.** Retrieval ranks by similarity. Pasted in that order, the model reads references before the thing they refer to. Sorting by document position with a breadcrumb on each piece is one of the cheapest improvements here.
 
@@ -100,7 +105,9 @@ def answer(question, doc_id):
 
 Summaries drift: they state things the source doesn't. I keep them as extractive as possible and let a summary hit expand to source text before the final answer. Parsing fails silently: a missed heading merges two sections and nobody notices until answers get strange. And updates are expensive unless you only rebuild summaries on the path from the changed node to the root.
 
-<FieldNote prompt="Where did summaries drift or parsing fail on you, and how did you catch it?" />
+<FieldNote title="In production">
+Treat each summary as a set of claims and check them against the summary's own source chunks, not against the summary above it. The FABLES study of book-length summaries found no automatic rater that reliably caught unfaithful claims, so an LLM judge alone isn't enough. Store source IDs on every summary node, verify claims with NLI or question-answer consistency, and keep leaf summaries extractive where accuracy matters. The companion code defaults to extractive summaries, and a test fails if a summary contains a sentence the source doesn't.
+</FieldNote>
 
 Build your eval set with this in mind. Most RAG eval sets are full of find-the-fact questions because they're easy to write. Make a third of yours global or cross-reference, or you'll never see the failures this design exists for.
 
@@ -109,3 +116,7 @@ Build your eval set with this in mind. Most RAG eval sets are full of find-the-f
 - Sarthi et al., *RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval* (2024)
 - Anthropic, *Introducing Contextual Retrieval* (2024), on skipping RAG for small knowledge bases
 - LlamaIndex docs on hierarchical and auto-merging retrieval
+- Edge et al., *From Local to Global: A Graph RAG Approach* (2024)
+- Li et al., *Retrieval Augmented Generation or Long-Context LLMs?* (Self-Route, 2024)
+- Jeong et al., *Adaptive-RAG* (2024)
+- Kim et al., *FABLES: Evaluating faithfulness and content selection in book-length summarization* (2024)

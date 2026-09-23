@@ -8,6 +8,7 @@ import {
   getAllBlueprints,
   getBlueprint,
   getBlueprintMetas,
+  CODE_REPO,
   TYPE_LABEL,
 } from "@/lib/blueprints";
 import { CAPABILITIES, FLAGSHIP, SITE } from "@/lib/content";
@@ -143,6 +144,16 @@ export default async function BlueprintPage({ params }: Props) {
               )}
               <div className="space-y-3">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">Take it with you</p>
+                {b.code && (
+                  <a
+                    href={`${CODE_REPO}/tree/main/${b.code}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between gap-2 rounded-full bg-text px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-accent"
+                  >
+                    Run the code <span aria-hidden>↗</span>
+                  </a>
+                )}
                 <CopyMarkdown slug={b.slug} />
                 <a
                   href={`/blueprints/${b.slug}/raw`}
@@ -200,6 +211,16 @@ export default async function BlueprintPage({ params }: Props) {
                 </details>
               )}
               <div className="flex flex-wrap items-center gap-2 lg:hidden">
+                {b.code && (
+                  <a
+                    href={`${CODE_REPO}/tree/main/${b.code}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full bg-text px-4 py-2 text-sm font-medium text-ink"
+                  >
+                    Run the code ↗
+                  </a>
+                )}
                 <CopyMarkdown slug={b.slug} />
               </div>
               {caps.length > 0 && (

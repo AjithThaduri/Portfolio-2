@@ -23,6 +23,8 @@ export * from "./blueprint-meta";
      related    FLAGSHIP slug (optional) — links "Where I've used this"
      draft      true while awaiting review. Drafts show in dev and on
                 preview deploys, never on the production site.
+     code       optional path in the companion repo (CODE_REPO) with the
+                runnable version, e.g. src/blueprints/chunking.py
      repos      optional list of { repo: "owner/name", note: string } —
                 open-source projects worth exploring, shown as cards.
      changelog  optional list of { date: YYYY-MM-DD, note: string }, newest
@@ -63,6 +65,7 @@ const read = (file: string): Blueprint => {
     related: data.related,
     draft: Boolean(data.draft),
     repos: Array.isArray(data.repos) ? data.repos : [],
+    code: data.code,
     changelog: Array.isArray(data.changelog)
       ? data.changelog.map((c: { date: unknown; note: string }) => ({ date: String(c.date), note: c.note }))
       : [],

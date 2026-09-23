@@ -5,7 +5,8 @@ type: teardown
 status: tested
 topics: ["retrieval", "evaluation"]
 published: 2026-09-23
-draft: true
+draft: false
+code: src/blueprints/retrieval.py
 repos:
   - repo: microsoft/graphrag
     note: "Graph RAG with community summaries."
@@ -39,14 +40,16 @@ repos:
     note: "Evaluation and tracing."
 changelog:
   - date: 2026-09-23
-    note: First draft.
+    note: First published.
 ---
 
 Search GitHub for <Term id="rag">RAG</Term> and you'll find HyDE, RAPTOR, CRAG, Self-RAG, GraphRAG, ColPali and a hundred more, each with a paper and a benchmark it wins. What's missing is anyone saying which of them a normal team should actually build.
 
 These are my notes on that, grouped by where each pattern acts. Where the evidence is thin or comes from the vendor, I say so.
 
-<FieldNote prompt="Which of these patterns have you shipped in production, and which did you try and drop? A line each is enough." />
+<FieldNote title="In production">
+The best-documented production gains, in order: hybrid search, a reranker over the top 50–150, and context added to chunks. Anthropic's measurements stack them (35%, 49%, then 67% fewer retrieval failures) and found 20 retrieved chunks beat 10 or 5. Databricks reported their reranker lifting recall@10 from 74% to 89% on enterprise benchmarks, at around 1.5 seconds of added latency. Query rewriting as a standalone step has much thinner production evidence; routing has more.
+</FieldNote>
 
 <Flow
   title="Where the patterns act"
@@ -104,7 +107,9 @@ Google DeepMind's LIMIT paper adds a theoretical reason to care: single-vector e
 
 That last problem is real. An independent benchmark found graph RAG often underperforms plain RAG on real-world tasks. I'd use a graph when questions are about relationships across many documents, and not as a general upgrade.
 
-<FieldNote prompt="One pattern you think is overhyped, from your own experience, in a sentence or two." />
+<FieldNote title="In production">
+GraphRAG as a default. On GraphRAG-Bench, plain RAG recalled 83% of the evidence for simple factual questions against 70% for HippoRAG 2, and Microsoft GraphRAG's global search used around 331,000 tokens per query against about 900 for plain RAG. It earns that cost on complex, relational questions. Multi-agent retrieval is similar: Anthropic report multi-agent systems using about 15 times the tokens of a chat, worth it only when the task is valuable enough.
+</FieldNote>
 
 ## Adaptive and agentic
 
@@ -142,3 +147,5 @@ Anthropic suggest knowledge bases up to around 200,000 tokens can simply go in t
 - Edge et al., GraphRAG (2024); Guo et al., LightRAG (2024); Gutiérrez et al., HippoRAG 2 (2025); Xiang et al., GraphRAG-Bench (2025)
 - Yan et al., CRAG (2024); Jeong et al., Adaptive-RAG (2024); Asai et al., Self-RAG (2023); Wang et al., Speculative RAG (2024); Jin et al., Search-R1 (2025)
 - Li et al., Self-Route (2024); Chan et al., *Don't Do RAG* (2024); Joren et al., *Sufficient Context* (2024)
+- Databricks, *Reranking in Mosaic AI Vector Search* (2025)
+- Anthropic, *How we built our multi-agent research system* (2025)

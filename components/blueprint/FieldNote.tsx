@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
-/* First-hand notes from real projects — the part of a blueprint only the
-   author can write.
+/* Practical notes: first-hand lessons, or evidence-backed production
+   guidance (title="In production"). Never invented anecdotes.
 
    <FieldNote prompt="What broke first when you tried this?">
      Your answer here, in your own words.
@@ -38,7 +38,7 @@ export const FieldNote = ({
     <aside className="relative my-10 rounded-2xl bg-surface px-7 py-6">
       <span aria-hidden className="absolute -left-px top-6 h-10 w-[3px] rounded-full bg-accent-vivid" />
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">{title}</p>
-      <div className="mt-3 font-serif text-[1.3rem] italic leading-snug text-text [&>p]:m-0 [&>p]:font-serif [&>p]:text-[1.3rem] [&>p]:italic [&>p]:leading-snug [&>p]:text-text [&>p+p]:mt-3">
+      <div className="mt-3 text-[1.02rem] leading-[1.75] text-text [&>p]:m-0 [&>p]:text-[1.02rem] [&>p]:font-normal [&>p]:leading-[1.75] [&>p]:text-text [&>p+p]:mt-3">
         {children}
       </div>
     </aside>

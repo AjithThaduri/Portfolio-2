@@ -5,7 +5,8 @@ type: blueprint
 status: tested
 topics: ["agents"]
 published: 2026-09-23
-draft: true
+draft: false
+code: src/blueprints/memory
 repos:
   - repo: letta-ai/letta
     note: "Agents that manage their own memory (MemGPT lineage), with background consolidation."
@@ -27,14 +28,16 @@ repos:
     note: "Benchmark for long-term memory, including updated facts and abstention."
 changelog:
   - date: 2026-09-23
-    note: First draft.
+    note: First published.
 ---
 
 The easy way to give an <Term id="agent">agent</Term> memory is to send it everything, every turn. It works well until conversations get long. Then each turn gets slower and costs more, a decision from forty turns ago gets buried under tool output, and eventually the history doesn't fit in the <Term id="context-window">context window</Term> at all.
 
 Adding a vector database helps less than people expect, because memory isn't one thing. What the user prefers, what happened last Tuesday and how to format a report are different kinds of memory, and they need different handling.
 
-<FieldNote prompt="What kind of agent did you build this for (keep it generic), and at what point did full history start to hurt: how many turns, how many tokens, what latency?" />
+<FieldNote title="In production">
+Trouble starts earlier than the context window suggests. NVIDIA's RULER found effective context around half the advertised length for several models (64K of 128K). In NoLiMa, 11 models fell below half their short-context accuracy at 32K tokens when the question and answer didn't share keywords. Chroma's context-rot study found focused inputs of about 300 tokens scored well above full 113K-token histories on LongMemEval. Budget for degradation somewhere around 32K–64K tokens, and expect latency and cost to show it first.
+</FieldNote>
 
 ## Before building anything
 
@@ -75,7 +78,9 @@ Before each turn, search the stores with the current request using vector simila
 Old tool results are usually most of a long history and rarely matter again. Clearing them from older turns is the lightest way to shrink context; Anthropic call it one of the safest forms of compaction.
 </Callout>
 
-<FieldNote prompt="A memory bug you hit: the agent remembered something wrong, forgot something important, or mixed up users. What caused it?" />
+<FieldNote title="In production">
+Design against four failures. Poisoning: in 2024 a prompt injection in untrusted content wrote persistent instructions into ChatGPT's memory (since fixed), so untrusted content should never write memory directly. Leakage: isolate storage per user and validate every path; Anthropic's memory-tool docs call out path traversal specifically. Stale facts: invalidate superseded facts with timestamps, as Graphiti does. Over-remembering: cap sizes and expire what hasn't been used. The companion code implements the last three, with a test for each.
+</FieldNote>
 
 ## Options
 
@@ -101,7 +106,9 @@ The files option is worth trying first. Letta reported that an agent on a small 
 - **Graph, optionally:** Graphiti on Neo4j or FalkorDB, when facts change over time and relationships matter.
 - **Frameworks:** Letta if the agent should manage its own memory, Mem0 as a layer beside an existing agent, LangGraph's store and LangMem if you're already in that ecosystem.
 
-<FieldNote prompt="Which store and framework did you actually use, and what would you choose differently next time?" />
+<FieldNote title="In production">
+Default to Postgres with pgvector. Keeping memory next to your users and tenants makes isolation and deletion simple, and published benchmarks (from a Postgres vendor, so read them accordingly) show pgvector-based setups competitive with dedicated vector databases at tens of millions of vectors. Add a graph only when you need to reason over how facts change or relate; Graphiti needs Neo4j or FalkorDB and a model with structured output on every write. Letta's result that plain file tools scored 74% on LoCoMo is a reminder that retrieval quality matters more than the store.
+</FieldNote>
 
 ## One turn, sketched
 
@@ -151,3 +158,6 @@ def consolidate(user_id):
 - Xu et al., *A-MEM: Agentic Memory for LLM Agents* (2025)
 - Wu et al., *LongMemEval* (ICLR 2025); Maharana et al., *LoCoMo* (2024)
 - Anthropic, *Effective context engineering for AI agents* (2025); OpenAI Agents SDK session docs
+- Hsieh et al., *RULER* (NVIDIA, 2024); Modarressi et al., *NoLiMa* (2025); Chroma, *Context Rot* (2025)
+- Rehberger, *SpAIware* — persistent memory injection in ChatGPT (2024)
+- Anthropic memory tool documentation; Timescale, *pgvector vs Pinecone* (vendor benchmark)
