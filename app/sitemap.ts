@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       .filter((b) => !b.draft)
       .map((b) => page(`/blueprints/${b.slug}`, 0.8, b.updated ?? b.published)),
     ...CAPABILITIES.map((c) => page(`/capabilities/${c.slug}`, 0.6)),
+    page("/open-source", 0.7),
     page("/about", 0.7),
     page("/work-with-me", 0.7),
     page("/teaching", 0.6),

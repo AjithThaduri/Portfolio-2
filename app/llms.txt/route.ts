@@ -11,6 +11,7 @@ import {
   STACK,
   FAQ,
   CAPABILITIES,
+  OPEN_SOURCE,
 } from "@/lib/content";
 import { getAllBlueprints } from "@/lib/blueprints";
 
@@ -77,6 +78,11 @@ export function GET() {
     }
     lines.push("");
   }
+
+  lines.push("## Open source");
+  lines.push("");
+  for (const r of OPEN_SOURCE.mine) lines.push(`- [${r.title}](https://github.com/${r.repo}) — ${r.body}`);
+  lines.push("");
 
   lines.push("## Capabilities");
   lines.push("");

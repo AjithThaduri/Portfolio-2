@@ -12,6 +12,7 @@
    /work-with-me     ENGAGE
    /blueprints       BLUEPRINTS_INTRO — articles themselves are MDX files in
                      content/blueprints/ (see lib/blueprints.ts)
+   /open-source      OPEN_SOURCE — my public repos and the ones I rely on
    /glossary         lib/glossary.ts
    every page        CONTACT (bottom), NAV (top)
 
@@ -48,6 +49,7 @@ export const SITE = {
 export const NAV = [
   { label: "Work", href: "/work" },
   { label: "Blueprints", href: "/blueprints" },
+  { label: "Open source", href: "/open-source" },
   { label: "About", href: "/about" },
   { label: "Teaching", href: "/teaching" },
 ];
@@ -770,4 +772,43 @@ export const BLUEPRINTS_INTRO = {
     note: "A shorter opinion or lesson learned.",
   },
   license: "Text and diagrams are CC BY 4.0 — use them, adapt them, credit the source.",
+};
+
+/* Public code. "mine" are repos I wrote. "rely" credits other people's
+   projects I recommend — always link the ORIGINAL repository, never a copy. */
+export type RepoCard = { repo: string; title: string; body: string; tags: string[] };
+
+export const OPEN_SOURCE = {
+  title: "Open source",
+  headline: "Code you can run, and the projects I build on.",
+  lede: "Most of my production work lives in private client repositories, so it can't be shared. What I can share is here: runnable reference code for my blueprints, and the open-source projects I think deserve more attention.",
+  mine: [
+    {
+      repo: "AjithThaduri/blueprints",
+      title: "Blueprints: runnable reference code",
+      body: "The working version of every blueprint on this site: chunking strategies you can compare on your own documents, long-document retrieval with a heading tree, tiered OCR routing and tiered agent memory. Dependency-free core, tested in CI.",
+      tags: ["RAG", "OCR", "Agent memory", "Python"],
+    },
+    {
+      repo: "AjithThaduri/rag-eval",
+      title: "rag-eval",
+      body: "Retrieval evaluation with a regression gate that uses a paired bootstrap, so CI fails on real drops and ignores noise, plus an LLM judge you calibrate against human labels before trusting it.",
+      tags: ["Evaluation", "CI", "LLM-as-judge"],
+    },
+  ] as RepoCard[],
+  relyIntro: "Well-built projects that solve real problems, several of them less known than they should be. Each belongs to its authors.",
+  rely: [
+    { repo: "jina-ai/late-chunking", title: "Late chunking", body: "Chunk embeddings that carry the whole document's context, with no extra model calls. The cleanest fix I know for chunks that lose meaning on their own.", tags: ["Retrieval", "Embeddings"] },
+    { repo: "parthsarthi03/raptor", title: "RAPTOR", body: "Recursive summary trees for answering questions about a whole document. The idea behind my long-document design.", tags: ["Long documents"] },
+    { repo: "TIGER-AI-Lab/LongRAG", title: "LongRAG", body: "Retrieves long units instead of short passages, so long-context models see coherent evidence. A useful counterweight to over-chunking.", tags: ["Long context"] },
+    { repo: "hhhuang/CAG", title: "Cache-augmented generation", body: "Skip retrieval entirely for small, static knowledge bases by preloading and caching them. Worth knowing before building a RAG stack you don't need.", tags: ["Alternatives to RAG"] },
+    { repo: "vectara/open-rag-eval", title: "open-rag-eval", body: "RAG evaluation that works without golden answers. Handy when you have real traffic but no labelled set yet.", tags: ["Evaluation"] },
+    { repo: "lightonai/pylate", title: "PyLate", body: "Training and running late-interaction (ColBERT-style) retrievers. The most active home for multi-vector retrieval.", tags: ["Retrieval", "Training"] },
+    { repo: "agiresearch/A-mem", title: "A-MEM", body: "Agent memory organised as linked, evolving notes. A thoughtful alternative to flat vector memory.", tags: ["Agent memory"] },
+    { repo: "xiaowu0162/LongMemEval", title: "LongMemEval", body: "The benchmark I'd use for agent memory: updated facts, reasoning across sessions and over time, and knowing when to say 'I don't know'.", tags: ["Agent memory", "Evaluation"] },
+    { repo: "getzep/graphiti", title: "Graphiti", body: "Temporal knowledge graphs where changed facts are invalidated, not deleted. The model for how I handle facts that change.", tags: ["Agent memory", "Graphs"] },
+    { repo: "docling-project/docling", title: "Docling", body: "MIT-licensed document conversion that keeps headings, tables and reading order. Structure-aware chunking starts here.", tags: ["Documents", "OCR"] },
+    { repo: "allenai/olmocr", title: "olmOCR", body: "An open OCR model and benchmark that holds up on hard pages, with published cost per million pages.", tags: ["OCR"] },
+    { repo: "FlagOpen/FlagEmbedding", title: "BGE embeddings & rerankers", body: "Open embedding and reranker models that run on one GPU. The reranker is the cheapest big win in most RAG stacks.", tags: ["Retrieval", "Models"] },
+  ] as RepoCard[],
 };
