@@ -16,6 +16,7 @@ export default function Work() {
       <PageHeader crumb={WORK_INDEX.title} title={WORK_INDEX.headline} lede={WORK_INDEX.lede} />
       <section className="px-6 pb-24 sm:px-10 md:pb-32">
         <div className="mx-auto max-w-6xl">
+          <h2 className="sr-only">All projects</h2>
           <WorkIndex />
         </div>
       </section>

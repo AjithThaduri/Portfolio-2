@@ -80,29 +80,29 @@ export default async function BlueprintPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <header className="relative overflow-hidden px-6 pb-12 pt-36 sm:px-10 md:pt-44">
-        <Glow />
+        <Glow soft />
         <div className="relative mx-auto max-w-6xl">
           {b.draft && (
             <p className="mb-8 inline-flex rounded-full border border-flag/40 bg-flag/10 px-4 py-2 text-sm text-flag">
               Draft — awaiting review. Hidden on the live site until approved.
             </p>
           )}
-          <Reveal>
+          <Reveal fade={false}>
             <nav aria-label="Breadcrumb" className="font-mono text-[11px] uppercase tracking-[0.2em]">
-              <Link href="/" className="text-faint transition-colors hover:text-text">Home</Link>
+              <Link href="/" className="text-muted transition-colors hover:text-text">Home</Link>
               <span aria-hidden className="mx-3 text-line">/</span>
-              <Link href="/blueprints" className="text-faint transition-colors hover:text-text">Blueprints</Link>
+              <Link href="/blueprints" className="text-muted transition-colors hover:text-text">Blueprints</Link>
               <span aria-hidden className="mx-3 text-line">/</span>
-              <span className="text-accent">{TYPE_LABEL[b.type]}</span>
+              <span aria-current="page" className="font-medium text-text">{TYPE_LABEL[b.type]}</span>
             </nav>
           </Reveal>
-          <Reveal delay={0.06}>
+          <Reveal fade={false} delay={0.06}>
             <h1 className="mt-8 max-w-4xl text-balance text-4xl font-medium leading-[1.06] tracking-[-0.035em] text-text sm:text-5xl md:text-[3.6rem]">
               {b.title}
             </h1>
           </Reveal>
-          <Reveal delay={0.12}>
-            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-faint">
+          <Reveal fade={false} delay={0.12}>
+            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-muted">
               <StatusBadge status={b.status} />
               <span>{b.readingMinutes} min read</span>
               <span aria-hidden>·</span>
@@ -111,7 +111,7 @@ export default async function BlueprintPage({ params }: Props) {
               </span>
             </div>
           </Reveal>
-          <Reveal delay={0.18}>
+          <Reveal fade={false} delay={0.18}>
             <div className="mt-10 rounded-3xl bg-surface px-7 py-8 sm:px-10">
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">In plain terms</p>
               <p className="mt-4 max-w-3xl text-balance font-serif text-2xl italic leading-snug text-text sm:text-[1.9rem]">

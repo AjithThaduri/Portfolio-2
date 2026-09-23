@@ -55,29 +55,29 @@ export default async function CaseStudy({ params }: Props) {
       <ReadingProgress />
 
       <header className="relative overflow-hidden px-6 pb-14 pt-36 sm:px-10 md:pt-44">
-        <Glow />
+        <Glow soft />
         <div className="relative mx-auto max-w-6xl">
-          <Reveal>
+          <Reveal fade={false}>
             <nav aria-label="Breadcrumb" className="font-mono text-[11px] uppercase tracking-[0.2em]">
-              <Link href="/" className="text-faint transition-colors hover:text-text">
+              <Link href="/" className="text-muted transition-colors hover:text-text">
                 Home
               </Link>
               <span aria-hidden className="mx-3 text-line">/</span>
-              <Link href="/#work" className="text-faint transition-colors hover:text-text">
+              <Link href="/#work" className="text-muted transition-colors hover:text-text">
                 Work
               </Link>
               <span aria-hidden className="mx-3 text-line">/</span>
-              <span className="text-accent">{p.n}</span>
+              <span aria-current="page" className="font-medium text-text">{p.n}</span>
             </nav>
           </Reveal>
 
-          <Reveal delay={0.06}>
+          <Reveal fade={false} delay={0.06}>
             <h1 className="mt-8 max-w-4xl text-balance text-4xl font-medium leading-[1.05] tracking-[-0.035em] text-text sm:text-5xl md:text-[4rem]">
               {p.title}
             </h1>
           </Reveal>
 
-          <Reveal delay={0.12}>
+          <Reveal fade={false} delay={0.12}>
             <dl className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-3">
               {[
                 { k: "Sector", v: p.sector },
@@ -92,7 +92,7 @@ export default async function CaseStudy({ params }: Props) {
             </dl>
           </Reveal>
 
-          <Reveal delay={0.18}>
+          <Reveal fade={false} delay={0.18}>
             <div className="mt-6 rounded-3xl bg-surface px-7 py-8 sm:px-10 sm:py-10">
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">
                 In plain terms
@@ -141,7 +141,7 @@ export default async function CaseStudy({ params }: Props) {
                 {p.decisions.map((d, i) => (
                   <li key={d.head} className="h-full">
                     <Reveal delay={0.04 * (i % 2)} className="flex h-full flex-col rounded-3xl border border-line bg-raised p-7">
-                      <span className="font-serif text-3xl italic leading-none text-accent/80">
+                      <span className="text-gradient w-fit pb-1 pr-2 font-serif text-3xl italic leading-none">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <h3 className="mt-6 text-lg font-medium tracking-tight text-text">{d.head}</h3>

@@ -80,10 +80,10 @@ export const WorkIndex = ({ initial }: { initial?: Cap }) => {
               {e.kind === "flagship" ? (
                 <Link
                   href={e.href}
-                  className="group flex h-full flex-col rounded-3xl border border-line bg-raised p-7 transition-all duration-500 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.35)]"
+                  className="group flex h-full flex-col rounded-3xl border border-line bg-raised p-7 transition-all duration-500 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[var(--card-glow)]"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <span className="font-serif text-4xl italic leading-none text-accent/80">{e.n}</span>
+                    <span className="text-gradient pb-1 pr-2 font-serif text-4xl italic leading-none">{e.n}</span>
                     <span className="rounded-full bg-accent/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
                       Case study
                     </span>

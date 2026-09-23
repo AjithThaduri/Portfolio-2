@@ -37,6 +37,7 @@ export default function Blueprints() {
 
       <section className="px-6 pb-24 sm:px-10 md:pb-32">
         <div className="mx-auto max-w-6xl">
+          <h2 className="sr-only">All blueprints</h2>
           <BlueprintList items={items} />
           <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-8 text-sm text-faint">
             <span>{BLUEPRINTS_INTRO.license}</span>

@@ -72,9 +72,11 @@ export const Hero = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [router]);
 
+  // Slide without fading: the headline and lede are the largest paint on
+  // the page, so they must be visible before JavaScript runs.
   const rise = (delay: number) => ({
-    initial: { opacity: 0, y: 24 },
-    animate: { opacity: 1, y: 0 },
+    initial: { y: 18 },
+    animate: { y: 0 },
     transition: { duration: 0.9, delay, ease: EASE },
   });
 
@@ -111,7 +113,7 @@ export const Hero = () => {
             </motion.span>
             <motion.span
               {...rise(0.22)}
-              className="relative mt-1 inline-block font-serif text-[1.04em] font-normal italic leading-[1.05] tracking-[-0.03em] text-accent"
+              className="text-gradient relative mt-1 inline-block pb-3 pr-3 font-serif text-[1.04em] font-normal italic leading-[1.05] tracking-[-0.03em]"
             >
               {last.replace(/\.$/, "")}
               <span
@@ -130,12 +132,19 @@ export const Hero = () => {
                 aria-hidden
                 viewBox="0 0 300 14"
                 preserveAspectRatio="none"
-                className="pointer-events-none absolute -bottom-2 left-0 h-3 w-[92%] text-accent-vivid"
+                className="pointer-events-none absolute bottom-0 left-0 h-3 w-[92%]"
               >
+                <defs>
+                  <linearGradient id="hero-underline" x1="0" x2="1" y1="0" y2="0">
+                    <stop offset="0%" style={{ stopColor: "var(--g1)" }} />
+                    <stop offset="55%" style={{ stopColor: "var(--g2)" }} />
+                    <stop offset="100%" style={{ stopColor: "var(--g3)" }} />
+                  </linearGradient>
+                </defs>
                 <motion.path
                   d="M2 9 C 60 3, 120 3, 180 7 S 270 11, 298 4"
                   fill="none"
-                  stroke="currentColor"
+                  stroke="url(#hero-underline)"
                   strokeWidth={2.4}
                   strokeLinecap="round"
                   initial={{ pathLength: 0, opacity: 0 }}
@@ -168,7 +177,7 @@ export const Hero = () => {
               {HERO.stats.map((s) => (
                 <div key={s.label} className="flex flex-col-reverse">
                   <dt className="mt-2 max-w-[8rem] text-xs leading-snug text-faint">{s.label}</dt>
-                  <dd className="text-4xl font-light leading-none tracking-tight text-text">
+                  <dd className="text-gradient w-fit pb-1 text-4xl font-light leading-none tracking-tight">
                     {s.value}
                   </dd>
                 </div>
@@ -197,8 +206,8 @@ export const Hero = () => {
 
         {/* ------------------------------------------------ portrait scene */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ scale: 0.97 }}
+          animate={{ scale: 1 }}
           transition={{ duration: 1.1, delay: 0.2, ease: EASE }}
           className="relative mx-auto w-full max-w-[460px]"
         >
@@ -272,7 +281,7 @@ const PortraitScene = () => {
             src="/img/portrait.webp"
             alt="Portrait of Ajith Thaduri"
             fill
-            sizes="(max-width: 1024px) 80vw, 340px"
+            sizes="(max-width: 640px) 78vw, 340px"
             className="object-cover"
             priority
           />

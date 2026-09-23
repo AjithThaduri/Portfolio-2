@@ -25,6 +25,10 @@ export default function OpenSource() {
 
       <section className="px-6 pb-24 sm:px-10 md:pb-32">
         <div className="mx-auto max-w-6xl">
+          <h2 className="mb-8 flex items-center gap-3 font-mono text-[11px] font-normal uppercase tracking-[0.2em] text-accent">
+            <span aria-hidden className="h-px w-6 bg-accent-vivid" />
+            My code
+          </h2>
           <RepoGrid repos={OPEN_SOURCE.mine} featured />
         </div>
       </section>

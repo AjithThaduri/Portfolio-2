@@ -4,7 +4,7 @@ import { Reveal } from "./Reveal";
 import { Section, SectionHead } from "./Section";
 
 export const Help = () => (
-  <Section id="help" tone="surface">
+  <Section id="help" tone="cool">
     <SectionHead eyebrow={HELP.title} title={HELP.lede} />
 
     <div className="grid gap-5 lg:grid-cols-3">
@@ -13,7 +13,7 @@ export const Help = () => (
           <article className="flex h-full flex-col rounded-3xl border border-line bg-raised p-8">
             <span
               aria-hidden
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-surface font-mono text-xs text-accent"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-cool font-mono text-xs text-accent ring-1 ring-line"
             >
               {String(i + 1).padStart(2, "0")}
             </span>
