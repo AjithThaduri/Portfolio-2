@@ -1,131 +1,142 @@
 ---
-title: "Open-source OCR: a tiered pipeline, and the trade-offs behind it"
-summary: "Open OCR models now rival paid APIs — but the best one for a scanned invoice is overkill for a clean PDF. This design sends each page to the cheapest tool that can read it well, and escalates only when it can't."
+title: "Open-source OCR: route pages, don't pick a model"
+summary: "Open OCR models now rival paid APIs, but the best one for a scanned form is wasted on a clean PDF. This pipeline sends each page to the cheapest tool that reads it well and escalates only when it can't."
 type: blueprint
-level: advanced
 status: tested
 topics: ["retrieval", "models"]
 published: 2026-09-23
 draft: true
+repos:
+  - repo: allenai/olmocr
+    note: "olmOCR toolkit and olmOCR-Bench; a strong escalation-tier model."
+  - repo: PaddlePaddle/PaddleOCR
+    note: "PP-OCR for fast CPU OCR, plus PaddleOCR-VL for the model tier."
+  - repo: zai-org/GLM-OCR
+    note: "Compact, layout-first document model."
+  - repo: docling-project/docling
+    note: "MIT-licensed conversion with pluggable OCR engines."
+  - repo: datalab-to/marker
+    note: "Text-layer-first PDF conversion; check the weights licence."
+  - repo: opendatalab/MinerU
+    note: "Tiered parsing from model-free to VLM; check the licence terms."
+  - repo: deepseek-ai/DeepSeek-OCR
+    note: "Vision-token compression and resolution modes."
+  - repo: rednote-hilab/dots.ocr
+    note: "Multilingual layout parsing in one model."
+  - repo: tesseract-ocr/tesseract
+    note: "The classic CPU engine, still useful for clean scans."
+  - repo: opendatalab/OmniDocBench
+    note: "Benchmark for end-to-end document parsing."
+  - repo: vllm-project/vllm
+    note: "Serving runtime most of these models support."
+changelog:
+  - date: 2026-09-23
+    note: First draft.
 ---
 
-Every document system eventually meets its first scanned page. Then its first fax, its first phone photo of a form, its first table that spans two columns. <Term id="ocr">OCR</Term> is where most document AI quietly loses accuracy — and because the text looks plausible, nobody notices until retrieval starts missing things.
+<Term id="ocr">OCR</Term> is where document AI loses accuracy without anyone noticing. The output looks like text, so it gets indexed, and the problem only shows up weeks later as retrieval that keeps missing things.
 
-The good news is that open-source OCR has changed completely in the last two years. Small vision-language models — around a billion parameters — now top the public benchmarks, ahead of models two hundred times their size, and they run on a single GPU. The catch is that no single model is best for every page, and the most accurate ones are hundreds of times slower than the simplest.
+Open-source OCR has changed a lot in two years. Document models of around a billion parameters now sit at the top of the public benchmarks, ahead of general models many times their size, and they run on one GPU. But the accurate models are far slower than the simple ones, and most pages don't need them.
 
-So I don't pick one model. I build a pipeline that routes.
+<FieldNote prompt="Which OCR tools have you actually run on real documents, on what hardware, and what made you move off the first one?" />
 
-## The architecture
+## The pipeline
 
 <Flow
   title="Tiered OCR"
   zones={[
-    { id: "cheap", label: "Cheap path (most pages)", tone: "teal" },
-    { id: "model", label: "Model path (hard pages)", tone: "accent" },
+    { id: "cheap", label: "Cheap path", tone: "teal" },
+    { id: "model", label: "Model path", tone: "accent" },
   ]}
   stages={[
-    { id: "triage", label: "Triage the page", note: "text layer? quality?", zone: "cheap", detail: "Check whether the PDF page already has an embedded text layer, and whether that text is any good — ratio of dictionary words, garbled characters, text coverage versus page area. Scanned pages and bad text layers go on; good ones skip OCR entirely." },
-    { id: "extract", label: "Use the text layer", note: "no OCR", zone: "cheap", detail: "For born-digital pages with a healthy text layer, extract it directly with layout information. This is by far the fastest path and, for these pages, usually the most accurate." },
-    { id: "layout", label: "Detect layout", note: "regions, reading order", zone: "model", detail: "Run a layout model on a downsampled page to find text blocks, tables, figures, formulas and reading order. The leading open systems all work this way: find the regions first, then read each one at full resolution." },
-    { id: "small", label: "Small VLM", note: "~1B, per region", zone: "model", detail: "Read each region with a compact document model — the ~1B class that now leads OmniDocBench. Fast enough to run on most pages, strong on tables and multi-column text." },
-    { id: "check", label: "Confidence check", zone: "model", detail: "Look for signs of trouble: low token confidence, tables whose rows don't add up, text that fails simple language checks, handwriting detected. Pages that pass go straight to output." },
-    { id: "large", label: "Escalate", note: "larger VLM", zone: "model", detail: "The small fraction of pages that fail the check go to a larger model — one strong on handwriting, forms and checkboxes. Expensive per page, cheap overall because so few pages reach it." },
-    { id: "out", label: "Structured output", note: "Markdown + coordinates", detail: "Emit Markdown or JSON with headings, tables and reading order preserved, plus page and bounding-box coordinates so every passage can be cited back to where it came from." },
+    { id: "triage", label: "Triage", note: "text layer? any good?", zone: "cheap", detail: "Check for an embedded text layer and score its quality: share of real words, garbled characters, how much of the page it covers. Good text layers skip OCR." },
+    { id: "extract", label: "Use the text layer", zone: "cheap", detail: "Born-digital pages with healthy text are read directly, with layout. Fastest path, and for these pages usually the most accurate." },
+    { id: "layout", label: "Detect layout", zone: "model", detail: "Find text blocks, tables, figures and reading order on a downsampled page. The leading open systems all do this before reading anything." },
+    { id: "small", label: "Small VLM", note: "~1B, per region", zone: "model", detail: "Read each region at full resolution with a compact document model. Handles most scanned pages, including tables and columns." },
+    { id: "check", label: "Check", zone: "model", detail: "Low confidence, tables whose rows don't line up, text that fails basic language checks, or handwriting: flag the page." },
+    { id: "large", label: "Escalate", note: "larger VLM", zone: "model", detail: "Flagged pages go to a larger model that is stronger on handwriting, forms and degraded scans. Expensive per page, cheap overall." },
+    { id: "out", label: "Output", note: "Markdown + boxes", detail: "Markdown or JSON with structure preserved, plus page numbers and bounding boxes so any passage can be cited back to its location." },
   ]}
 />
 
-## Why route instead of picking the best model
+## Why route
 
-Look at the published numbers and the case makes itself. One widely used toolkit reports its own pipeline at 76% on olmOCR-Bench running about 3 pages a second — and at 44% but 24 pages a second when it skips OCR and trusts the text layer. Same tool, same benchmark: an eight-times speed difference, and a thirty-point accuracy gap.
+One popular toolkit publishes both numbers for its own pipeline on olmOCR-Bench: 76% at about 3 pages a second with OCR, and 44% at about 24 pages a second when it trusts the text layer instead. That's eight times the speed for a thirty-point drop.
 
-Neither number is "right". Most pages in a typical corpus are born-digital, where the text layer is perfect and OCR only adds errors. A minority are scans, where the text layer is empty or garbage. Paying for the careful path on every page wastes most of your compute; using the fast path everywhere quietly ruins the scans.
+In a typical corpus most pages are born-digital, so OCR only adds errors to them. The scans are the minority, and for them the text layer is empty or wrong. Running the careful path everywhere wastes compute, and running the fast path everywhere ruins the scans.
 
-<Callout tone="warn" title="The triage check is not optional">
-Text layers lie. PDFs produced by old scanners often carry an invisible, badly OCR'd text layer on top of the image. If you trust every text layer, you inherit someone else's bad OCR. Check the quality before skipping.
+<Callout tone="warn" title="Text layers lie">
+Old scanners often embed an invisible, badly OCR'd text layer behind the image. Score the text layer before trusting it.
 </Callout>
 
-## Choosing models for each tier
+<FieldNote prompt="On a real corpus, roughly what share of pages went down each path? What surprised you about the mix?" />
+
+## Picking tools for each tier
 
 <Tradeoffs
-  columns={["Accuracy", "Speed", "Hardware needs", "Handles messy input"]}
+  columns={["Accuracy", "Speed", "Light hardware", "Messy input"]}
   rows={[
-    { name: "Text-layer extraction", cells: [3, 3, 3, 0], best: "Born-digital PDFs with a healthy text layer" },
-    { name: "Classic engines (Tesseract, PP-OCR)", cells: [1, 3, 3, 1], best: "Clean scans on CPU; a cheap first pass" },
-    { name: "Pipeline toolkits (Docling, Marker, MinerU)", cells: [2, 2, 2, 2], best: "Batteries-included conversion to Markdown" },
-    { name: "Small document VLMs (~1B)", cells: [3, 2, 2, 2], best: "The default model tier: tables, columns, many languages" },
-    { name: "Larger VLMs (3–8B)", cells: [3, 1, 1, 3], best: "Escalation tier: handwriting, forms, degraded scans" },
+    { name: "Text-layer extraction", cells: [3, 3, 3, 0], best: "Born-digital PDFs" },
+    { name: "Tesseract, PP-OCR", cells: [1, 3, 3, 1], best: "Clean scans on CPU" },
+    { name: "Docling, Marker, MinerU", cells: [2, 2, 2, 2], best: "Batteries-included conversion" },
+    { name: "Small document VLMs (~1B)", cells: [3, 2, 2, 2], best: "Default model tier" },
+    { name: "Larger VLMs (3–8B)", cells: [3, 1, 1, 3], best: "Handwriting, forms, bad scans" },
   ]}
-  caption="'Speed' and 'Hardware needs': more dots is better (faster, lighter). Based on published benchmarks and my own testing; check them against your documents."
+  caption="More dots is better. From published benchmarks plus my own testing. Check against your documents."
 />
 
-A few names worth knowing, grouped by the tier they suit:
+For the model tiers, the names I'd look at first: **PaddleOCR-VL** and **GLM-OCR** (both around 0.9B, layout-first, near the top of OmniDocBench) for the default tier, and **olmOCR 2** (7B, Apache-2.0) or **dots.ocr** for escalation. For toolkits, **Docling** is MIT-licensed with pluggable engines; **Marker** reads the text layer first and OCRs only where needed; **MinerU** offers tiers from model-free to VLM.
 
-- **Classic engines.** Tesseract (CPU only, needs clean 300 DPI input and preprocessing) and PaddleOCR's PP-OCR family, whose newest models range from about 1.5 to 35 million parameters and run fast on CPU.
-- **Pipeline toolkits.** Docling (MIT, pluggable OCR engines and a small VLM mode), Marker with Surya (reads the text layer first, OCRs only where needed), MinerU (tiers from model-free to VLM).
-- **Small document VLMs.** PaddleOCR-VL and GLM-OCR — both around 0.9B, both layout-first, both near the top of OmniDocBench.
-- **Larger VLMs.** olmOCR 2 (7B, Apache-2.0, trained with unit tests as rewards), dots.ocr, and models that specifically claim handwriting and checkbox support.
+## Making it fast
 
-## Where the real speed comes from
+**Serve, don't loop.** Most of these models support vLLM or SGLang. A notebook loop over pages leaves most of the GPU idle; a batched server doesn't.
 
-### Serve models properly
-Most of the current OCR models ship with support for high-throughput serving runtimes like vLLM or SGLang. Running them page-by-page through a notebook loop wastes most of the GPU. Batch pages, stream them through a server, and keep the GPU busy.
+**FP8 is nearly free.** AllenAI report olmOCR 2 at 82.4 in FP8 against 82.3 at full precision. Going down to 4-bit is less documented for OCR, so test it on your own pages before relying on it.
 
-### Compress the model
-AllenAI report that olmOCR 2 scores the same in FP8 as at full precision — 82.4 against 82.3. <Term id="quantization">Quantization</Term> to FP8 is close to free for these models. Going further, to 4-bit, is less documented for OCR specifically; measure it on your own pages before trusting it.
+**Render at the size the model was trained on.** olmOCR expects the longest side at 1288 pixels, and Tesseract wants 300 DPI. Bigger costs tokens without helping. DeepSeek-OCR makes the trade explicit: about 97% precision below tenfold compression into vision tokens, around 60% at twentyfold.
 
-### Render at the resolution the model expects
-Vision models are trained at particular image sizes. olmOCR expects the longest side at 1288 pixels; Tesseract wants 300 DPI. Rendering bigger doesn't help and costs tokens; rendering at an unfamiliar size quietly hurts accuracy. DeepSeek-OCR makes the trade-off explicit: its paper reports about 97% precision when a page is compressed less than tenfold into vision tokens, falling to around 60% at twentyfold.
+**Keep the big model rare.** AllenAI put olmOCR 2 at under $200 per million pages on their hardware. In a routed pipeline only a fraction of pages ever reach that tier.
 
-### Spend the expensive model where it matters
-Escalating only the pages that fail the confidence check is what makes a large model affordable. AllenAI publish a cost of under $200 per million pages for olmOCR 2 on their own hardware — and in a tiered pipeline, only a fraction of pages ever reach that tier.
+<FieldNote prompt="A document type that beat every model you tried. What was it, and what did you do in the end?" />
 
-## A sketch of the router
+## The router, sketched
 
 ```python
 def ocr_document(pdf):
-    out = []
+    pages = []
     for page in pdf.pages:
         text = page.text_layer()
         if text and text_quality(text, page) > 0.9:
-            out.append(from_text_layer(page))          # tier 0: no OCR
+            pages.append(from_text_layer(page))
             continue
-
         img = page.render(longest_side=1288)
-        regions = detect_layout(img.downsample())      # blocks, tables, order
+        regions = detect_layout(img.downsample())
         result = [small_vlm.read(img.crop(r)) for r in regions]
-
-        if needs_escalation(result):                   # low confidence,
-            result = large_vlm.read_page(img)           # handwriting, bad tables
-        out.append(assemble(result, regions, page.number))
-    return out
+        if needs_escalation(result):
+            result = large_vlm.read_page(img)
+        pages.append(assemble(result, regions, page.number))
+    return pages
 
 def text_quality(text, page):
     words = tokenize(text)
-    dictionary = sum(w.lower() in LEXICON for w in words) / max(len(words), 1)
-    coverage = text_area(page) / page.area
-    return 0.7 * dictionary + 0.3 * min(coverage * 3, 1.0)
+    real = sum(w.lower() in LEXICON for w in words) / max(len(words), 1)
+    coverage = min(text_area(page) / page.area * 3, 1.0)
+    return 0.7 * real + 0.3 * coverage
 ```
 
-## Things that catch people out
+## Things to know before choosing
 
-- **"Open" doesn't always mean free for business.** Several of the strongest models carry weights licences with revenue thresholds or extra conditions, even when the code is Apache-2.0. Read the model licence, not just the repository licence.
-- **The two main benchmarks disagree.** Pipeline tools trail badly on OmniDocBench but stay competitive on olmOCR-Bench. Pick the one that looks like your documents — then build a small benchmark from your own pages anyway.
-- **The top of the leaderboard is crowded.** On olmOCR-Bench the leading models sit within a few points of each other. Once you're in that group, speed, hardware fit and licence matter more than rank.
-- **A good OCR score isn't a good RAG score.** Recent work found that structural errors — merged columns, broken tables, lost headings — damage retrieval even when character error rates look fine. Evaluate OCR by what it does to your downstream search, not only by edit distance.
+- **Check the weights licence, not only the code licence.** Several strong models have revenue thresholds or extra conditions on the weights even when the repository is Apache-2.0.
+- **The benchmarks disagree.** Pipeline tools trail on OmniDocBench but stay competitive on olmOCR-Bench. Choose the one that resembles your documents, then build a small benchmark from your own pages anyway.
+- **At the top, rank barely matters.** The leading models on olmOCR-Bench are within a few points of each other. Speed, hardware and licence decide it.
+- **Judge OCR by retrieval.** Recent work found that structural errors like merged columns and broken tables hurt retrieval even when character error rates look fine. Run your retrieval <Term id="eval-set">eval set</Term> on the OCR output; that's the number that counts.
 
-## How to evaluate your own pipeline
+## Sources
 
-1. **Sample by page type.** Pull fifty pages each of born-digital, clean scan, degraded scan, tables and handwriting if you have them.
-2. **Label a small ground truth.** Correct text for a subset, plus the table structure for table pages.
-3. **Measure per tier.** Accuracy and pages-per-second for each route, and what fraction of pages each route receives.
-4. **Measure downstream.** Run your retrieval <Term id="eval-set">eval set</Term> on the OCR output. That's the number that matters.
-
-## Sources and further reading
-
-- AllenAI — *olmOCR* paper and *olmOCR 2* release notes; olmOCR-Bench
-- OpenDataLab — *OmniDocBench* (CVPR 2025) and *MinerU2.5*
-- PaddlePaddle — *PaddleOCR-VL* technical report
-- DeepSeek — *DeepSeek-OCR: Contexts Optical Compression* (2025)
-- Datalab — Marker and Surya benchmarks (vendor-reported)
-- IBM — Docling and granite-docling model card
-- Tesseract documentation — *Improving the quality of the output*
+- AllenAI, *olmOCR* (2025), *olmOCR 2* release notes, olmOCR-Bench
+- OpenDataLab, *OmniDocBench* (CVPR 2025); *MinerU2.5* (2025)
+- PaddlePaddle, *PaddleOCR-VL* technical report (2025)
+- DeepSeek, *DeepSeek-OCR: Contexts Optical Compression* (2025)
+- Datalab, Marker and Surya benchmark tables (vendor-reported)
+- IBM, Docling and the granite-docling model card
+- Tesseract docs, *Improving the quality of the output*

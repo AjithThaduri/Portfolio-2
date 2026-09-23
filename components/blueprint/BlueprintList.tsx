@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BlueprintMeta, LEVEL_LABEL, TYPE_LABEL } from "@/lib/blueprint-meta";
+import { BlueprintMeta, TYPE_LABEL } from "@/lib/blueprint-meta";
 import { CAPABILITIES } from "@/lib/content";
 import { BlueprintCard } from "./BlueprintCard";
 
-type Filter = { kind: "all" } | { kind: "type"; v: string } | { kind: "topic"; v: string } | { kind: "level"; v: string };
+type Filter = { kind: "all" } | { kind: "type"; v: string } | { kind: "topic"; v: string };
 
 const Chip = ({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) => (
   <button
@@ -29,16 +29,13 @@ export const BlueprintList = ({ items }: { items: BlueprintMeta[] }) => {
     [items],
   );
   const types = useMemo(() => [...new Set(items.map((b) => b.type))], [items]);
-  const levels = useMemo(() => [...new Set(items.map((b) => b.level))], [items]);
 
   const shown = items.filter((b) =>
     f.kind === "all"
       ? true
       : f.kind === "type"
         ? b.type === f.v
-        : f.kind === "topic"
-          ? b.topics.includes(f.v)
-          : b.level === f.v,
+        : b.topics.includes(f.v),
   );
   const is = (k: Filter["kind"], v?: string) => f.kind === k && (!v || ("v" in f && f.v === v));
 
@@ -57,12 +54,6 @@ export const BlueprintList = ({ items }: { items: BlueprintMeta[] }) => {
           types.map((t) => (
             <Chip key={t} on={is("type", t)} onClick={() => setF({ kind: "type", v: t })}>
               {TYPE_LABEL[t]}s
-            </Chip>
-          ))}
-        {levels.length > 1 &&
-          levels.map((l) => (
-            <Chip key={l} on={is("level", l)} onClick={() => setF({ kind: "level", v: l })}>
-              {LEVEL_LABEL[l]}
             </Chip>
           ))}
       </div>

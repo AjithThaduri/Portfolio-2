@@ -2,7 +2,6 @@
    re-exports these alongside the loader. */
 
 export type BlueprintType = "blueprint" | "teardown" | "note";
-export type Level = "beginner" | "intermediate" | "advanced";
 export type Status = "production" | "tested" | "experimental";
 
 export type BlueprintMeta = {
@@ -10,7 +9,6 @@ export type BlueprintMeta = {
   title: string;
   summary: string;
   type: BlueprintType;
-  level: Level;
   status: Status;
   topics: string[];
   published: string;
@@ -18,6 +16,8 @@ export type BlueprintMeta = {
   related?: string;
   draft: boolean;
   readingMinutes: number;
+  changelog: { date: string; note: string }[];
+  repos: { repo: string; note: string }[];
 };
 
 export const TYPE_LABEL: Record<BlueprintType, string> = {
@@ -30,12 +30,6 @@ export const STATUS_LABEL: Record<Status, string> = {
   production: "Used in production",
   tested: "Built & tested",
   experimental: "Experimental",
-};
-
-export const LEVEL_LABEL: Record<Level, string> = {
-  beginner: "Beginner",
-  intermediate: "Intermediate",
-  advanced: "Advanced",
 };
 
 export const formatDate = (iso: string) =>

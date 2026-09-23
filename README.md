@@ -44,6 +44,13 @@ frontmatter fields are documented at the top of `lib/blueprints.ts`.
   line (or set `false`) once every technical claim has been checked.
 - `status` is a promise to the reader: `production` only if it has run in a
   live system.
+- `<FieldNote prompt="…">` marks where your own experience goes. Empty, it
+  shows a dashed "your note needed" box on drafts; filled, it renders as
+  "From my notes". **The build fails if a published blueprint still has an
+  empty FieldNote.**
+- `repos:` in the frontmatter lists open-source projects to explore; they
+  render as cards at the end and appear in the raw Markdown.
+- `changelog:` lists revisions, newest first.
 - Building blocks available inside MDX: `<Flow>` (interactive diagram, exports
   Mermaid), `<Tradeoffs>` (comparison table), `<Steps>`/`<Step>`,
   `<Callout tone="note|tip|warn">`, and `<Term id="rag">RAG</Term>` for glossary

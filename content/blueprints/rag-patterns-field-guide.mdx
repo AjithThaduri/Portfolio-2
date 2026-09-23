@@ -1,150 +1,144 @@
 ---
-title: "A field guide to RAG patterns — what's worth it, what isn't"
-summary: "There are dozens of named RAG techniques. Most teams need four or five. This is my map of the landscape — what each pattern does, what the evidence says, and the order I'd reach for them."
+title: "RAG patterns: which ones are worth it"
+summary: "There are dozens of named RAG techniques and most teams need four or five. What each pattern does, what the evidence says, and the order I'd reach for them."
 type: teardown
-level: intermediate
 status: tested
 topics: ["retrieval", "evaluation"]
 published: 2026-09-23
 draft: true
+repos:
+  - repo: microsoft/graphrag
+    note: "Graph RAG with community summaries."
+  - repo: HKUDS/LightRAG
+    note: "Graph plus vector retrieval with incremental updates."
+  - repo: OSU-NLP-Group/HippoRAG
+    note: "Graph retrieval that holds up on simple factual questions."
+  - repo: illuin-tech/colpali
+    note: "Retrieval over page images, no OCR."
+  - repo: stanford-futuredata/ColBERT
+    note: "Late-interaction retrieval."
+  - repo: lightonai/pylate
+    note: "Training and running late-interaction models."
+  - repo: FlagOpen/FlagEmbedding
+    note: "Open embedding and reranker models."
+  - repo: jina-ai/late-chunking
+    note: "Late chunking reference implementation."
+  - repo: VectifyAI/PageIndex
+    note: "Vector-free, table-of-contents navigation (self-reported benchmarks)."
+  - repo: PeterGriffinJin/Search-R1
+    note: "RL-trained search agents."
+  - repo: infiniflow/ragflow
+    note: "Maintained RAG engine with deep document parsing."
+  - repo: deepset-ai/haystack
+    note: "Maintained orchestration framework."
+  - repo: run-llama/llama_index
+    note: "Maintained framework with most of these patterns built in."
+  - repo: explodinggradients/ragas
+    note: "RAG evaluation metrics."
+  - repo: truera/trulens
+    note: "Evaluation and tracing."
+changelog:
+  - date: 2026-09-23
+    note: First draft.
 ---
 
-Search GitHub for <Term id="rag">RAG</Term> and you'll find hundreds of techniques with confident names: HyDE, RAPTOR, CRAG, Self-RAG, GraphRAG, ColPali. Each comes with a paper and a benchmark where it wins.
+Search GitHub for <Term id="rag">RAG</Term> and you'll find HyDE, RAPTOR, CRAG, Self-RAG, GraphRAG, ColPali and a hundred more, each with a paper and a benchmark it wins. What's missing is anyone saying which of them a normal team should actually build.
 
-What's harder to find is someone saying *which of these you actually need*. This guide is my attempt. It groups the patterns by where they act in the pipeline, says what each costs, and is honest about where the evidence is thin — including a few places where the popular technique turns out not to beat the boring one.
+These are my notes on that, grouped by where each pattern acts. Where the evidence is thin or comes from the vendor, I say so.
 
-## The pipeline, and where each pattern acts
+<FieldNote prompt="Which of these patterns have you shipped in production, and which did you try and drop? A line each is enough." />
 
 <Flow
-  title="Where the patterns sit"
+  title="Where the patterns act"
   stages={[
-    { id: "q", label: "Query", note: "rewrite · route", detail: "Change the question before searching: rewrite it, split it into parts, generate a hypothetical answer to search with (HyDE), or decide whether it needs retrieval at all (Adaptive-RAG)." },
-    { id: "i", label: "Index", note: "chunk · enrich", detail: "Change what gets stored: better chunking, context added to each chunk (contextual retrieval, late chunking), summaries in a tree (RAPTOR), atomic propositions, or a knowledge graph." },
-    { id: "r", label: "Retrieve", note: "hybrid · multi-vector", detail: "Change how you search: keyword and vector together (hybrid), token-level matching (ColBERT), or search over page images with no OCR at all (ColPali/ColQwen)." },
-    { id: "rr", label: "Rerank & check", note: "cross-encoder · CRAG", detail: "Re-order and filter what came back: a cross-encoder reranker, or an evaluator that decides whether the results are good enough to use, need refining, or should be thrown away (Corrective RAG)." },
-    { id: "g", label: "Generate", note: "cite · abstain", detail: "Change how the answer is written: cite every claim, answer from drafts written by a small model and checked by a large one (Speculative RAG), and abstain when the context isn't sufficient." },
-    { id: "e", label: "Evaluate", note: "recall · faithfulness", detail: "Measure each stage separately: did the right passages come back (Recall@k, MRR), and is the answer faithful to them (RAGAS, TruLens, LLM-as-judge)." },
+    { id: "q", label: "Query", note: "rewrite, route", detail: "Rewrite or split the question, search with a hypothetical answer (HyDE), or decide whether it needs retrieval at all (Adaptive-RAG)." },
+    { id: "i", label: "Index", note: "chunk, enrich", detail: "Chunk better, add context to each chunk (contextual retrieval, late chunking), build summary trees (RAPTOR), extract propositions, or build a graph." },
+    { id: "r", label: "Retrieve", note: "hybrid, multi-vector", detail: "Keyword plus vector (hybrid), token-level matching (ColBERT), or search over page images with no OCR (ColPali, ColQwen)." },
+    { id: "rr", label: "Rerank, check", detail: "A cross-encoder reranker, or an evaluator that decides whether results are good enough, need refining, or should be discarded (Corrective RAG)." },
+    { id: "g", label: "Generate", note: "cite, abstain", detail: "Cite every claim, draft with a small model and verify with a large one (Speculative RAG), and abstain when context is insufficient." },
+    { id: "e", label: "Evaluate", detail: "Retrieval (Recall@k, MRR) and answers (faithfulness via RAGAS, TruLens or an LLM judge), measured separately." },
   ]}
 />
 
-## Start here: best improvement for the effort
-
-If you only read one section, read this one. In my experience — and where published evidence exists, it agrees — this is the order that pays off:
+## If you do five things
 
 <Steps>
-  <Step title="Build a small eval set first">
-    Fifty to two hundred real questions, each labelled with the passage that answers it. Every other step on this list is a guess until you can measure <Term id="eval-set">Recall@k</Term> before and after.
+  <Step title="An eval set">
+    Fifty to two hundred real questions, each tagged with the passage that answers it. Everything below is guesswork until you can measure <Term id="eval-set">Recall@k</Term> before and after.
   </Step>
-  <Step title="Hybrid search: keyword plus vector">
-    Run <Term id="bm25">BM25</Term> alongside vector search and merge with reciprocal rank fusion. No model calls, and it catches the IDs, codes and rare terms that embeddings blur.
+  <Step title="Hybrid search">
+    <Term id="bm25">BM25</Term> next to vector search, merged with reciprocal rank fusion. No model calls, and it catches IDs, codes and rare words that embeddings blur.
   </Step>
-  <Step title="Add a reranker">
-    Retrieve fifty to a hundred and fifty candidates, let a cross-encoder <Term id="reranker">reranker</Term> pick the best handful. Open-weights options such as bge-reranker-v2-m3 run comfortably on a single GPU.
+  <Step title="A reranker">
+    Pull 50–150 candidates and let a cross-encoder <Term id="reranker">reranker</Term> choose. Open-weights models like bge-reranker-v2-m3 fit on one GPU.
   </Step>
-  <Step title="Give chunks their context">
-    Prepend a short description of where each chunk sits before embedding it (contextual retrieval), or use late chunking if you'd rather not pay for a model call per chunk.
+  <Step title="Context on each chunk">
+    Contextual retrieval (a model-written line of context per chunk) or late chunking (no model calls). Details in my [chunking comparison](/blueprints/chunking-strategies-compared).
   </Step>
-  <Step title="Route questions by difficulty">
-    Easy questions don't need the expensive path. A cheap classifier that picks no-retrieval, single-step or multi-step saves cost without hurting quality.
+  <Step title="Routing by difficulty">
+    A cheap classifier picks no retrieval, one step or multi-step. Easy questions stop paying for the expensive path.
   </Step>
 </Steps>
 
-<Callout tone="note" title="What the numbers say">
-Anthropic's contextual retrieval write-up is one of the few that isolates each step. On their tests, contextual embeddings cut top-20 retrieval failures by 35%; adding contextual BM25 took that to 49%; adding a reranker, 67%. The last two are the hybrid-search and reranker steps above.
-</Callout>
+Anthropic's contextual retrieval post is one of the few that measures these steps separately. On their tests, contextual embeddings cut top-20 retrieval failures by 35%, adding contextual BM25 took it to 49%, and adding a reranker to 67%.
 
-## Query-side patterns
+## Query side
 
-- **HyDE.** Have a model write a hypothetical answer, then search with *that* instead of the question. Helps when questions and documents use very different language. Costs a model call per query, and backfires when the model knows nothing about the domain.
-- **Multi-query / RAG-Fusion.** Rewrite the question several ways, retrieve for each, fuse the results. Answers get more complete — the paper also notes some drift off-topic when the rewrites wander.
-- **Step-back prompting.** Ask a more general question first ("what principle governs this?"), then the specific one. Strong reported gains on reasoning-heavy benchmarks.
-- **Decomposition.** Split a compound question into parts and answer each. Less a named technique than a habit that shows up inside most agentic systems.
+**HyDE** has a model write a hypothetical answer and searches with that. It helps when questions and documents use different vocabulary, and backfires when the model doesn't know the domain. **Multi-query / RAG-Fusion** rewrites the question several ways and fuses the results; answers get more complete, though the paper notes some drift off-topic. **Step-back prompting** asks a more general question first and reports strong gains on reasoning benchmarks. **Decomposition** is less a technique than a habit most agentic systems already have.
 
-## Index-side patterns
+## Index side
 
-- **Contextual retrieval** and **late chunking** — covered in my [chunking comparison](/blueprints/chunking-strategies-compared). Of everything on the index side, these have the clearest evidence.
-- **Parent–child / auto-merging.** Match on small chunks, hand the model the larger section. Framework practice rather than a paper, and one of my defaults.
-- **RAPTOR.** Cluster and summarise chunks recursively into a tree, then search every level. Good for questions about a whole document; expensive to build and awkward to update. I use a structure-based variant in my [long-document design](/blueprints/long-document-rag).
-- **Propositions.** Index atomic facts instead of passages. Sharper matching, a much bigger index, and an extraction pass to pay for.
+Contextual retrieval and late chunking have the clearest evidence. **Parent–child** retrieval (match small, read big) is one of my defaults. **RAPTOR** builds recursive summary trees; it's good for whole-document questions and expensive to update, and I use a structure-based version in my [long-document design](/blueprints/long-document-rag). **Propositions** index atomic facts: sharper matches, a much bigger index.
 
-<Callout tone="warn" title="The finding that surprised me">
-A 2024 study comparing semantic chunking with plain fixed-size chunks concluded the extra cost wasn't justified by consistent gains. Where you cut matters less than what context each piece carries.
-</Callout>
+One result worth knowing: a 2024 study found semantic chunking's gains over fixed-size chunks too inconsistent to justify its cost.
 
-## Retrieval-side patterns
+## Retrieval side
 
-- **Hybrid search.** Covered above. If you do one thing, do this.
-- **Rerankers.** Covered above. The second thing.
-- **ColBERT / late interaction.** Keep a vector per token instead of one per chunk, and match at that level. More accurate and more robust — at several times the storage.
-- **ColPali / ColQwen.** Embed the *page image* directly with a vision-language model, skipping OCR and layout parsing entirely. For visually rich documents — slides, forms, reports full of charts — this now beats text pipelines on the ViDoRe benchmark, and small variants exist for modest hardware.
+Beyond hybrid search and reranking, two ideas stand out. **ColBERT**-style late interaction keeps a vector per token instead of per chunk: more accurate, several times the storage. **ColPali / ColQwen** embed page images directly with a vision-language model, skipping OCR. For slides, forms and chart-heavy reports this now beats text pipelines on the ViDoRe benchmark, and there are small variants for modest hardware.
 
-There's also a theoretical reason to care about the last two. Google DeepMind's LIMIT paper shows that single-vector embeddings have a hard ceiling on which combinations of documents they can return, set by the embedding's dimension. Hybrid search, multi-vector retrieval and reranking are all ways around that ceiling.
+Google DeepMind's LIMIT paper adds a theoretical reason to care: single-vector embeddings have a ceiling, set by their dimension, on which combinations of documents they can return. Hybrid search, multi-vector retrieval and reranking all work around it.
 
-## Graph RAG: useful, not a default
+## Graph RAG
 
-Knowledge-graph approaches extract entities and relationships, then search the graph as well as the text.
+**GraphRAG** (Microsoft) summarises communities of entities and is good at corpus-wide "what are the themes?" questions; its README warns indexing is expensive. **LightRAG** mixes graph and vector retrieval and updates incrementally. **HippoRAG 2** was designed to stop graph RAG losing to plain RAG on simple factual questions.
 
-- **Microsoft GraphRAG** builds communities of related entities and summarises each, which makes it strong at corpus-wide "what are the themes here?" questions. Its own README warns that indexing is expensive.
-- **LightRAG** combines graph and vector retrieval at two levels and supports incremental updates, so new documents don't force a rebuild.
-- **HippoRAG 2** uses Personalized PageRank over the graph and was built specifically to stop graph RAG losing to plain RAG on simple factual questions.
+That last problem is real. An independent benchmark found graph RAG often underperforms plain RAG on real-world tasks. I'd use a graph when questions are about relationships across many documents, and not as a general upgrade.
 
-That last point matters. An independent benchmark found graph RAG *frequently underperforms* vanilla RAG on real-world tasks, and another study found the two have distinct strengths that combine well. My take: reach for a graph when questions are about relationships across many documents — who's connected to what, what changed over time — not as an upgrade to every pipeline.
+<FieldNote prompt="One pattern you think is overhyped, from your own experience, in a sentence or two." />
 
-## Adaptive and agentic patterns
+## Adaptive and agentic
 
-- **Corrective RAG (CRAG).** A light evaluator grades what came back and decides: use it, refine it, or discard it and search elsewhere. Plug-in, no training.
-- **Adaptive-RAG.** A small classifier routes each question to no retrieval, one step, or multi-step retrieval.
-- **Self-RAG.** A model trained to decide for itself when to retrieve and to critique its own output. Powerful, but you need that trained model.
-- **Speculative RAG.** A small model writes several drafts from different document subsets in parallel; a large model picks and checks. Reported gains in both accuracy and latency.
-- **RL-trained search agents.** Search-R1 and R1-Searcher train models with reinforcement learning to decide when and what to search. Deep-research agents extend this to long multi-step investigations. The fastest-moving area — and one where most headline numbers are still self-reported.
+**Corrective RAG** grades what came back and decides to use, refine or discard it; it plugs in without training. **Adaptive-RAG** routes by question complexity. **Self-RAG** needs a specially trained model. **Speculative RAG** drafts with a small model in parallel and verifies with a large one, reporting gains in accuracy and latency. **Search-R1** and similar work train models with reinforcement learning to decide when and what to search. That last area moves fastest, and most of its headline numbers are self-reported.
 
-## When you don't need RAG at all
+## When not to use RAG
 
 <Tradeoffs
-  columns={["Answer quality", "Cost per query", "Freshness", "Simplicity"]}
+  columns={["Quality", "Cheap per query", "Fresh data", "Simple"]}
   rows={[
     { name: "Classic RAG", cells: [2, 3, 3, 2], best: "Large or changing corpora" },
-    { name: "Whole corpus in context (+ caching)", cells: [3, 1, 2, 3], best: "Small knowledge bases, a few hundred pages at most" },
-    { name: "Cache-augmented generation", cells: [3, 2, 1, 2], best: "Small, static corpora queried constantly" },
-    { name: "Route per query (Self-Route)", cells: [3, 2, 3, 1], best: "Mixed traffic where some questions need everything" },
+    { name: "Everything in context, cached", cells: [3, 1, 2, 3], best: "A few hundred pages at most" },
+    { name: "Cache-augmented generation", cells: [3, 2, 1, 2], best: "Small, static, queried constantly" },
+    { name: "Route per query (Self-Route)", cells: [3, 2, 3, 1], best: "Mixed traffic" },
   ]}
-  caption="'Cost per query' and 'Freshness': more dots is better. Long context tends to win on quality when cost is no object; RAG's edge is mostly cost."
+  caption="More dots is better. When cost doesn't matter, long context usually wins on quality; RAG's advantage is mostly cost."
 />
 
-Anthropic's own guidance is that a knowledge base of up to around 200,000 tokens can simply go in the prompt, with caching. A 2024 study found long context consistently beats RAG on quality when fully resourced — and that letting the model choose per query gets most of that quality at a fraction of the cost.
+Anthropic suggest knowledge bases up to around 200,000 tokens can simply go in the prompt. A 2024 study found long context beats RAG on quality when fully resourced, and that letting the model choose per query keeps most of that quality at much lower cost.
 
-## Things I'd tell a team starting out
+## Notes for a team starting out
 
-1. **Measure retrieval and answers separately.** If the right passage isn't coming back, no prompt will fix it.
-2. **Retrieval failures look like confident answers.** Research from Google found that when context is insufficient, large models tend to answer anyway rather than abstain. Teach your system to say "I don't have enough to answer that".
-3. **Build on maintained frameworks, not reference code.** Many famous research repos are dormant or archived. Borrow the idea; implement it on something that's still updated.
-4. **Visual documents may not need OCR.** If your PDFs are slides and charts, try page-image retrieval before building an OCR pipeline.
-5. **Be sceptical of single-number claims.** Especially vendor benchmarks. Run the idea on your own eval set before believing it.
-
-## Repositories worth reading
-
-- [microsoft/graphrag](https://github.com/microsoft/graphrag) and [HKUDS/LightRAG](https://github.com/HKUDS/LightRAG) — graph-based retrieval
-- [OSU-NLP-Group/HippoRAG](https://github.com/OSU-NLP-Group/HippoRAG) — graph retrieval that holds up on simple questions
-- [illuin-tech/colpali](https://github.com/illuin-tech/colpali) — retrieval over page images
-- [lightonai/pylate](https://github.com/lightonai/pylate) — training and using late-interaction models
-- [FlagOpen/FlagEmbedding](https://github.com/FlagOpen/FlagEmbedding) — open embedding and reranker models
-- [jina-ai/late-chunking](https://github.com/jina-ai/late-chunking) — reference implementation
-- [VectifyAI/PageIndex](https://github.com/VectifyAI/PageIndex) — vector-free, table-of-contents navigation (benchmarks self-reported)
-- [infiniflow/ragflow](https://github.com/infiniflow/ragflow), [deepset-ai/haystack](https://github.com/deepset-ai/haystack), [run-llama/llama_index](https://github.com/run-llama/llama_index) — maintained engines to build on
-- [explodinggradients/ragas](https://github.com/explodinggradients/ragas), [truera/trulens](https://github.com/truera/trulens) — evaluation
+- Measure retrieval and answers separately. A missing passage can't be fixed by prompting.
+- Expect retrieval failures to look like confident answers. Google found large models tend to answer rather than abstain when context is insufficient, so build in "I don't have enough to answer that".
+- Build on maintained frameworks. Many well-known research repos are dormant or archived; take the idea and implement it on something still updated.
+- For visual PDFs, try page-image retrieval before building an OCR pipeline.
+- Run any single-number claim on your own eval set before believing it, especially vendor numbers.
 
 ## Sources
 
-- Anthropic — *Introducing Contextual Retrieval* (2024)
-- Gao et al. — *Precise Zero-Shot Dense Retrieval without Relevance Labels* (HyDE, 2022)
-- Rackauckas — *RAG-Fusion: a New Take on Retrieval-Augmented Generation* (2024)
-- Zheng et al. — *Take a Step Back* (step-back prompting, 2023)
-- Qu et al. — *Is Semantic Chunking Worth the Computational Cost?* (2024)
-- Faysse et al. — *ColPali: Efficient Document Retrieval with Vision Language Models* (2024)
-- Weller et al. — *On the Theoretical Limitations of Embedding-Based Retrieval* (LIMIT, 2025)
-- Edge et al. — *From Local to Global: A Graph RAG Approach* (2024); Guo et al. — *LightRAG* (2024); Gutiérrez et al. — *From RAG to Memory* (HippoRAG 2, 2025)
-- Xiang et al. — *When to use Graphs in RAG* (GraphRAG-Bench, 2025)
-- Yan et al. — *Corrective RAG* (2024); Jeong et al. — *Adaptive-RAG* (2024); Asai et al. — *Self-RAG* (2023); Wang et al. — *Speculative RAG* (2024)
-- Jin et al. — *Search-R1* (2025)
-- Li et al. — *Retrieval Augmented Generation or Long-Context LLMs?* (Self-Route, 2024); Chan et al. — *Don't Do RAG* (CAG, 2024)
-- Joren et al. — *Sufficient Context* (2024)
+- Anthropic, *Introducing Contextual Retrieval* (2024)
+- Gao et al., HyDE (2022); Rackauckas, *RAG-Fusion* (2024); Zheng et al., *Take a Step Back* (2023)
+- Qu et al., *Is Semantic Chunking Worth the Computational Cost?* (2024)
+- Faysse et al., *ColPali* (2024); Weller et al., *On the Theoretical Limitations of Embedding-Based Retrieval* (2025)
+- Edge et al., GraphRAG (2024); Guo et al., LightRAG (2024); Gutiérrez et al., HippoRAG 2 (2025); Xiang et al., GraphRAG-Bench (2025)
+- Yan et al., CRAG (2024); Jeong et al., Adaptive-RAG (2024); Asai et al., Self-RAG (2023); Wang et al., Speculative RAG (2024); Jin et al., Search-R1 (2025)
+- Li et al., Self-Route (2024); Chan et al., *Don't Do RAG* (2024); Joren et al., *Sufficient Context* (2024)

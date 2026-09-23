@@ -2,6 +2,7 @@ import Link from "next/link";
 import { isValidElement, ReactElement, ReactNode } from "react";
 import { highlight } from "sugar-high";
 import { CodeBlock } from "./CodeBlock";
+import { FieldNote } from "./FieldNote";
 import { Flow } from "./Flow";
 import { Term } from "./Term";
 
@@ -234,4 +235,5 @@ export const mdxComponents = {
   Tradeoffs,
   Flow,
   Term,
+  FieldNote,
 };

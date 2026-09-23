@@ -8,12 +8,12 @@ import {
   getAllBlueprints,
   getBlueprint,
   getBlueprintMetas,
-  LEVEL_LABEL,
   TYPE_LABEL,
 } from "@/lib/blueprints";
 import { CAPABILITIES, FLAGSHIP, SITE } from "@/lib/content";
 import { BlueprintCard, StatusBadge } from "@/components/blueprint/BlueprintCard";
 import { CopyMarkdown } from "@/components/blueprint/CopyMarkdown";
+import { RepoList } from "@/components/blueprint/RepoList";
 import { mdxComponents, tocFromBody } from "@/components/blueprint/mdx";
 import { ReadingProgress } from "@/components/ReadingProgress";
 import { Reveal } from "@/components/Reveal";
@@ -49,7 +49,10 @@ export default async function BlueprintPage({ params }: Props) {
   const b = getBlueprint(slug);
   if (!b) notFound();
 
-  const toc = tocFromBody(b.body);
+  const toc = [
+    ...tocFromBody(b.body),
+    ...(b.repos.length ? [{ id: "repos", label: "Repos to explore" }] : []),
+  ];
   const related = b.related ? FLAGSHIP.find((f) => f.slug === b.related) : undefined;
   const caps = CAPABILITIES.filter((c) => b.topics.includes(c.slug));
   const more = getBlueprintMetas()
@@ -64,7 +67,6 @@ export default async function BlueprintPage({ params }: Props) {
     description: b.summary,
     datePublished: b.published,
     dateModified: b.updated ?? b.published,
-    proficiencyLevel: LEVEL_LABEL[b.level],
     author: { "@id": `${SITE.url}#person` },
     url: `${SITE.url}/blueprints/${b.slug}`,
     license: "https://creativecommons.org/licenses/by/4.0/",
@@ -100,8 +102,6 @@ export default async function BlueprintPage({ params }: Props) {
           <Reveal delay={0.12}>
             <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-faint">
               <StatusBadge status={b.status} />
-              <span>{LEVEL_LABEL[b.level]}</span>
-              <span aria-hidden>·</span>
               <span>{b.readingMinutes} min read</span>
               <span aria-hidden>·</span>
               <span>
@@ -161,6 +161,8 @@ export default async function BlueprintPage({ params }: Props) {
               options={{ blockJS: false, mdxOptions: { remarkPlugins: [remarkGfm] } }}
             />
 
+            <RepoList repos={b.repos} />
+
             <footer className="mt-20 space-y-5">
               {related && (
                 <Link
@@ -177,6 +179,25 @@ export default async function BlueprintPage({ params }: Props) {
                   </span>
                   <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
                 </Link>
+              )}
+              {b.changelog.length > 0 && (
+                <details className="group rounded-3xl border border-line px-7 py-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-sm text-muted">
+                    <span>
+                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">Changelog</span>
+                      <span className="ml-3">{b.changelog.length} revision{b.changelog.length > 1 ? "s" : ""}</span>
+                    </span>
+                    <span aria-hidden className="transition-transform group-open:rotate-45">+</span>
+                  </summary>
+                  <ol className="mt-4 space-y-2 border-t border-line pt-4">
+                    {b.changelog.map((c) => (
+                      <li key={c.date + c.note} className="flex gap-4 text-sm">
+                        <span className="w-24 shrink-0 font-mono text-xs text-faint">{formatDate(c.date)}</span>
+                        <span className="font-light text-muted">{c.note}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </details>
               )}
               <div className="flex flex-wrap items-center gap-2 lg:hidden">
                 <CopyMarkdown slug={b.slug} />

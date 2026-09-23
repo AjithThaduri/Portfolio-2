@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   BlueprintMeta,
   formatDate,
-  LEVEL_LABEL,
   STATUS_LABEL,
   TYPE_LABEL,
 } from "@/lib/blueprint-meta";
@@ -28,10 +27,6 @@ export const BlueprintCard = ({ b }: { b: BlueprintMeta }) => (
     <div className="flex flex-wrap items-center gap-2">
       <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
         {TYPE_LABEL[b.type]}
-      </span>
-      <span aria-hidden className="text-line">·</span>
-      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">
-        {LEVEL_LABEL[b.level]}
       </span>
       {b.draft && (
         <span className="ml-auto rounded-full bg-flag/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-flag">
