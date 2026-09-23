@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
+import { MotionConfig } from "framer-motion";
 
 /* Lenis owns the scroll position, which means it also owns the problems a
    browser normally solves for free. This component handles them:
@@ -150,5 +151,5 @@ export const SmoothScroll = ({ children }: { children: ReactNode }) => {
     };
   }, [pathname]);
 
-  return <>{children}</>;
+  return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
 };

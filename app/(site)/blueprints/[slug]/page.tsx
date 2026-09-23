@@ -17,6 +17,7 @@ import { CopyMarkdown } from "@/components/blueprint/CopyMarkdown";
 import { RepoList } from "@/components/blueprint/RepoList";
 import { mdxComponents, tocFromBody } from "@/components/blueprint/mdx";
 import { ReadingProgress } from "@/components/ReadingProgress";
+import { Toc } from "@/components/Toc";
 import { Reveal } from "@/components/Reveal";
 import { Glow } from "@/components/Section";
 
@@ -125,23 +126,7 @@ export default async function BlueprintPage({ params }: Props) {
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-16">
           <aside className="hidden lg:block">
             <div className="sticky top-32 space-y-10">
-              {toc.length > 0 && (
-                <nav aria-label="On this page">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">On this page</p>
-                  <ul className="mt-5 space-y-1 border-l border-line">
-                    {toc.map((t) => (
-                      <li key={t.id}>
-                        <a
-                          href={`#${t.id}`}
-                          className="-ml-px block border-l border-transparent py-1.5 pl-4 text-sm leading-snug text-muted transition-colors hover:border-accent hover:text-text"
-                        >
-                          {t.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-              )}
+              {toc.length > 0 && <Toc items={toc} />}
               <div className="space-y-3">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">Take it with you</p>
                 {b.code && (

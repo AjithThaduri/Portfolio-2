@@ -41,6 +41,10 @@ const DIR = path.join(process.cwd(), "content", "blueprints");
 /** Drafts are hidden only on the production deployment. */
 export const showDrafts = process.env.VERCEL_ENV !== "production";
 
+/* YAML turns an unquoted 2026-09-23 into a Date; normalise to YYYY-MM-DD. */
+const isoDate = (v: unknown): string =>
+  v instanceof Date ? v.toISOString().slice(0, 10) : String(v ?? "").slice(0, 10);
+
 /* Matches <FieldNote ... /> or <FieldNote ...>   </FieldNote> with nothing inside. */
 const EMPTY_NOTE = /<FieldNote\b[^>]*?(\/>|>\s*<\/FieldNote>)/;
 
@@ -60,14 +64,14 @@ const read = (file: string): Blueprint => {
     type: data.type ?? "blueprint",
     status: data.status ?? "experimental",
     topics: data.topics ?? [],
-    published: String(data.published),
-    updated: data.updated ? String(data.updated) : undefined,
+    published: isoDate(data.published),
+    updated: data.updated ? isoDate(data.updated) : undefined,
     related: data.related,
     draft: Boolean(data.draft),
     repos: Array.isArray(data.repos) ? data.repos : [],
     code: data.code,
     changelog: Array.isArray(data.changelog)
-      ? data.changelog.map((c: { date: unknown; note: string }) => ({ date: String(c.date), note: c.note }))
+      ? data.changelog.map((c: { date: unknown; note: string }) => ({ date: isoDate(c.date), note: c.note }))
       : [],
     readingMinutes: Math.max(1, Math.round(words / 220)),
     body: content,

@@ -35,7 +35,7 @@ const FlagshipCards = () => (
           </p>
 
           <ul className="relative mt-8 flex flex-wrap gap-2">
-            {p.stack.slice(0, 4).map((s) => (
+            {p.stack.slice(0, 3).map((s) => (
               <li
                 key={s}
                 className="rounded-full border border-line px-3 py-1 font-mono text-[10px] text-faint"
@@ -65,7 +65,7 @@ const FlagshipCards = () => (
 
 export const Work = () => (
   <Section id="work" tone="surface">
-    <SectionHead eyebrow={WORK_INTRO.title} title={WORK_INTRO.lede} />
+    <SectionHead eyebrow={WORK_INTRO.title} title={WORK_INTRO.headline} lede={WORK_INTRO.lede} />
     <FlagshipCards />
     <MoreWork />
     <div className="mt-12 flex justify-center">

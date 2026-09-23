@@ -33,13 +33,16 @@ export const STATUS_LABEL: Record<Status, string> = {
   experimental: "Experimental",
 };
 
-export const formatDate = (iso: string) =>
-  new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
+export const formatDate = (iso: string) => {
+  const d = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
     timeZone: "UTC",
   });
+};
 
 export const SITE_LICENSE = "CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)";
 

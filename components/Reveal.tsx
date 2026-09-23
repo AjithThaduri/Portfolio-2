@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ReactNode } from "react";
 
 export const Reveal = ({
@@ -12,9 +12,10 @@ export const Reveal = ({
   delay?: number;
   className?: string;
 }) => {
-  const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
-
+  // No reduced-motion branch here on purpose: the server can't know the
+  // preference, so branching would leave server-rendered content hidden.
+  // <MotionConfig reducedMotion="user"> (in SmoothScroll) turns the rise
+  // into a plain fade for people who ask for less motion.
   return (
     <motion.div
       className={className}

@@ -40,7 +40,7 @@ export const SITE = {
   // Must match the host that actually serves (the apex 307s to www).
   // If you make the apex primary in Vercel, change this one line back.
   url: "https://www.ajiththaduri.site",
-  email: "Ajiththaduri1@gmail.com",
+  email: "ajiththaduri1@gmail.com",
   linkedin: "https://www.linkedin.com/in/ajiththaduri",
   github: "https://github.com/AjithThaduri",
   location: "Hyderabad, India",
@@ -89,7 +89,8 @@ export const HERO = {
 
 export const WORK_INTRO = {
   title: "Selected work",
-  lede: "A few systems I've led, described by the problem they had to solve. Client names stay private; the thinking behind each one is on its own page.",
+  headline: "Systems I've led.",
+  lede: "Each one is described by the problem it had to solve. Client names stay private; the thinking behind each is on its own page.",
 };
 
 export type Flagship = {
@@ -373,7 +374,8 @@ export const MORE_WORK: WorkItem[] = [
 
 export const PRINCIPLES = {
   title: "How I work",
-  lede: "Plenty of AI looks good in a demo. The harder part is building something people can trust with real data. A few habits guide how I do that.",
+  headline: "Built to be trusted with real data.",
+  lede: "Plenty of AI looks good in a demo. The harder part is building something people can rely on. A few habits guide how I do that.",
   items: [
     {
       n: "01",
@@ -609,7 +611,7 @@ export const FAQ = [
   },
   {
     q: "How do you get in touch?",
-    a: "By email at Ajiththaduri1@gmail.com, on LinkedIn at linkedin.com/in/ajiththaduri, or on GitHub as AjithThaduri. He usually replies within a day.",
+    a: "By email at ajiththaduri1@gmail.com, on LinkedIn at linkedin.com/in/ajiththaduri, or on GitHub as AjithThaduri. He usually replies within a day.",
   },
 ];
 

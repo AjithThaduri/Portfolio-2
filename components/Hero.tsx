@@ -55,7 +55,6 @@ const SectorIcon = ({ name }: { name: string }) => {
 };
 
 export const Hero = () => {
-  const reduce = useReducedMotion();
   const router = useRouter();
 
   /* A door for one person. Type her name anywhere, or click the full stop
@@ -73,14 +72,11 @@ export const Hero = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [router]);
 
-  const rise = (delay: number) =>
-    reduce
-      ? {}
-      : {
-          initial: { opacity: 0, y: 24 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.9, delay, ease: EASE },
-        };
+  const rise = (delay: number) => ({
+    initial: { opacity: 0, y: 24 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.9, delay, ease: EASE },
+  });
 
   const first = HERO.headline[0];
   const last = HERO.headline[HERO.headline.length - 1];
@@ -88,7 +84,7 @@ export const Hero = () => {
   return (
     <section
       id="top"
-      className="relative overflow-hidden px-6 pb-16 pt-32 sm:px-10 md:pt-40 lg:flex lg:min-h-[100svh] lg:flex-col lg:justify-center lg:pb-24"
+      className="relative overflow-hidden px-6 pb-16 pt-28 sm:px-10 md:pt-32 lg:flex lg:min-h-[100svh] lg:flex-col lg:justify-center lg:pb-16 lg:pt-28"
     >
       <div aria-hidden className="hero-grid pointer-events-none absolute inset-0" />
       <Glow />
@@ -109,13 +105,13 @@ export const Hero = () => {
             </span>
           </motion.div>
 
-          <h1 className="mt-9 text-[2.75rem] font-medium leading-[1] tracking-[-0.045em] text-text sm:text-6xl lg:text-[5.1rem]">
-            <motion.span {...rise(0.12)} className="block">
+          <h1 className="mt-8 text-balance text-[2.6rem] font-medium leading-[1.02] tracking-[-0.045em] text-text sm:text-[3.5rem] lg:text-[3.9rem] xl:text-[4.4rem]">
+            <motion.span {...rise(0.12)} className="block max-w-[13ch] lg:max-w-none">
               {first}
             </motion.span>
             <motion.span
               {...rise(0.22)}
-              className="relative mt-1 inline-block font-serif text-[1.1em] font-normal italic leading-[1.05] tracking-[-0.02em] text-accent"
+              className="relative mt-1 inline-block font-serif text-[1.04em] font-normal italic leading-[1.05] tracking-[-0.03em] text-accent"
             >
               {last.replace(/\.$/, "")}
               <span
@@ -142,7 +138,7 @@ export const Hero = () => {
                   stroke="currentColor"
                   strokeWidth={2.4}
                   strokeLinecap="round"
-                  initial={reduce ? false : { pathLength: 0, opacity: 0 }}
+                  initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: 0.85 }}
                   transition={{ duration: 1.1, delay: 0.9, ease: EASE }}
                 />
@@ -152,7 +148,7 @@ export const Hero = () => {
 
           <motion.p
             {...rise(0.34)}
-            className="mt-10 max-w-xl text-pretty text-lg font-light leading-relaxed text-muted md:text-[1.2rem]"
+            className="mt-8 max-w-xl text-pretty text-lg font-light leading-relaxed text-muted md:text-[1.15rem]"
           >
             {HERO.lede}
           </motion.p>
@@ -166,7 +162,7 @@ export const Hero = () => {
 
           <motion.div
             {...rise(0.54)}
-            className="mt-14 grid gap-8 border-t border-line pt-8 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-12"
+            className="mt-12 grid gap-8 border-t border-line pt-7 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-12"
           >
             <dl className="flex gap-10">
               {HERO.stats.map((s) => (
@@ -201,7 +197,7 @@ export const Hero = () => {
 
         {/* ------------------------------------------------ portrait scene */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, scale: 0.96 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.1, delay: 0.2, ease: EASE }}
           className="relative mx-auto w-full max-w-[460px]"
@@ -210,20 +206,6 @@ export const Hero = () => {
         </motion.div>
       </div>
 
-      {/* scroll cue */}
-      <motion.a
-        href="#work"
-        aria-label="Scroll to work"
-        initial={reduce ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.4, duration: 0.8 }}
-        className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 font-mono text-[10px] uppercase tracking-[0.24em] text-faint transition-colors hover:text-text lg:flex"
-      >
-        Scroll
-        <span className="relative h-10 w-px overflow-hidden bg-line">
-          <span className="cue absolute inset-0 bg-accent-vivid" />
-        </span>
-      </motion.a>
     </section>
   );
 };
@@ -310,9 +292,9 @@ const PortraitScene = () => {
 
       {/* floating notes — desktop and tablet; on phones they sit in a row below */}
       <motion.div style={reduce ? undefined : { x: nx, y: ny }} className="pointer-events-none absolute inset-0 hidden sm:block">
-        <Note note={n1} className="drift absolute left-0 top-[14%] max-w-[220px]" />
-        <Note note={n2} className="drift-slow absolute right-0 top-[46%] max-w-[220px]" />
-        <Note note={n3} className="drift absolute bottom-[8%] left-2 max-w-[220px] [animation-delay:-3s]" />
+        <Note note={n1} className="drift absolute left-2 top-[10%] max-w-[244px]" />
+        <Note note={n2} className="drift-slow absolute right-0 top-[40%] max-w-[244px]" />
+        <Note note={n3} className="drift absolute bottom-[30%] left-0 max-w-[244px] [animation-delay:-3s]" />
       </motion.div>
 
       <ul className="mt-6 grid gap-2 sm:hidden">

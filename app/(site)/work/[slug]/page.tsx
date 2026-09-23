@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { FLAGSHIP } from "@/lib/content";
 import { Diagram } from "@/components/Diagrams";
 import { ReadingProgress } from "@/components/ReadingProgress";
+import { Toc } from "@/components/Toc";
 import { Reveal } from "@/components/Reveal";
 import { Glow } from "@/components/Section";
 
@@ -107,23 +108,9 @@ export default async function CaseStudy({ params }: Props) {
       <div className="px-6 pb-28 sm:px-10 md:pb-36">
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-16">
           <aside className="hidden lg:block">
-            <nav aria-label="On this page" className="sticky top-32">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">
-                On this page
-              </p>
-              <ul className="mt-5 space-y-1 border-l border-line">
-                {TOC.map((t) => (
-                  <li key={t.id}>
-                    <a
-                      href={`#${t.id}`}
-                      className="-ml-px block border-l border-transparent py-1.5 pl-4 text-sm text-muted transition-colors hover:border-accent hover:text-text"
-                    >
-                      {t.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <div className="sticky top-32">
+              <Toc items={TOC} />
+            </div>
           </aside>
 
           <div className="min-w-0 space-y-24">

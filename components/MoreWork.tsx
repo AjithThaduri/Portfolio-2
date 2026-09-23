@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { MORE_WORK, MORE_WORK_INITIAL, SHOW_DRAFTS } from "@/lib/content";
 import { Reveal } from "./Reveal";
 
 export const MoreWork = () => {
-  const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
 
   const items = MORE_WORK.filter(
@@ -38,10 +37,10 @@ export const MoreWork = () => {
             return (
               <motion.li
                 key={`${w.title}-${i}`}
-                layout={!reduce}
-                initial={reduce ? false : { opacity: 0, y: 16 }}
+                layout
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={reduce ? undefined : { opacity: 0, y: 8 }}
+                exit={{ opacity: 0, y: 8 }}
                 transition={{
                   duration: 0.45,
                   delay: i >= MORE_WORK_INITIAL ? 0.05 * (i - MORE_WORK_INITIAL) : 0,
