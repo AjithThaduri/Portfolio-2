@@ -794,7 +794,14 @@ export const BLUEPRINTS_INTRO = {
 
 /* Public code. "mine" are repos I wrote. "rely" credits other people's
    projects I recommend — always link the ORIGINAL repository, never a copy. */
-export type RepoCard = { repo: string; title: string; body: string; tags: string[] };
+export type RepoCard = {
+  repo: string;
+  title: string;
+  body: string;
+  tags: string[];
+  /** Set for projects hosted on my GitHub but written by someone else. */
+  upstream?: string;
+};
 
 export const OPEN_SOURCE = {
   title: "Open source",
@@ -813,17 +820,26 @@ export const OPEN_SOURCE = {
       body: "Retrieval evaluation with a regression gate that uses a paired bootstrap, so CI fails on real drops and ignores noise, plus an LLM judge you calibrate against human labels before trusting it.",
       tags: ["Evaluation", "CI", "LLM-as-judge"],
     },
+    {
+      repo: "AjithThaduri/n8n-workflow-automation",
+      title: "Visual workflow automation",
+      body: "A drag-and-drop workflow platform in the spirit of n8n: a React Flow canvas, a backend engine that executes saved workflows in real time, trigger, action and if/else nodes, and an AI summary step.",
+      tags: ["Workflow automation", "React Flow", "Node.js"],
+    },
   ] as RepoCard[],
-  relyIntro: "Well-built projects that solve real problems, several of them less known than they should be. Each belongs to its authors.",
+  hostedIntro: "Research code I keep on my GitHub because I use and recommend it. Each is the original authors' work, with their licence intact.",
+  relyIntro: "Well-built projects I build on. Each belongs to its authors.",
+  hosted: [
+    { repo: "AjithThaduri/late-chunking", upstream: "jina-ai/late-chunking", title: "Late chunking", body: "Chunk embeddings that carry the whole document's context, with no extra model calls. The cleanest fix I know for chunks that lose meaning on their own.", tags: ["Retrieval", "Embeddings"] },
+    { repo: "AjithThaduri/raptor", upstream: "parthsarthi03/raptor", title: "RAPTOR", body: "Recursive summary trees for answering questions about a whole document. The idea behind my long-document design.", tags: ["Long documents"] },
+    { repo: "AjithThaduri/LongRAG", upstream: "TIGER-AI-Lab/LongRAG", title: "LongRAG", body: "Retrieves long units instead of short passages, so long-context models see coherent evidence. A useful counterweight to over-chunking.", tags: ["Long context"] },
+    { repo: "AjithThaduri/CAG", upstream: "hhhuang/CAG", title: "Cache-augmented generation", body: "Skip retrieval entirely for small, static knowledge bases by preloading and caching them. Worth knowing before building a RAG stack you don't need.", tags: ["Alternatives to RAG"] },
+    { repo: "AjithThaduri/open-rag-eval", upstream: "vectara/open-rag-eval", title: "open-rag-eval", body: "RAG evaluation that works without golden answers. Handy when you have real traffic but no labelled set yet.", tags: ["Evaluation"] },
+    { repo: "AjithThaduri/pylate", upstream: "lightonai/pylate", title: "PyLate", body: "Training and running late-interaction (ColBERT-style) retrievers. The most active home for multi-vector retrieval.", tags: ["Retrieval", "Training"] },
+    { repo: "AjithThaduri/A-mem", upstream: "agiresearch/A-mem", title: "A-MEM", body: "Agent memory organised as linked, evolving notes. A thoughtful alternative to flat vector memory.", tags: ["Agent memory"] },
+    { repo: "AjithThaduri/LongMemEval", upstream: "xiaowu0162/LongMemEval", title: "LongMemEval", body: "The benchmark I'd use for agent memory: updated facts, reasoning across sessions and over time, and knowing when to say 'I don't know'.", tags: ["Agent memory", "Evaluation"] },
+  ] as RepoCard[],
   rely: [
-    { repo: "jina-ai/late-chunking", title: "Late chunking", body: "Chunk embeddings that carry the whole document's context, with no extra model calls. The cleanest fix I know for chunks that lose meaning on their own.", tags: ["Retrieval", "Embeddings"] },
-    { repo: "parthsarthi03/raptor", title: "RAPTOR", body: "Recursive summary trees for answering questions about a whole document. The idea behind my long-document design.", tags: ["Long documents"] },
-    { repo: "TIGER-AI-Lab/LongRAG", title: "LongRAG", body: "Retrieves long units instead of short passages, so long-context models see coherent evidence. A useful counterweight to over-chunking.", tags: ["Long context"] },
-    { repo: "hhhuang/CAG", title: "Cache-augmented generation", body: "Skip retrieval entirely for small, static knowledge bases by preloading and caching them. Worth knowing before building a RAG stack you don't need.", tags: ["Alternatives to RAG"] },
-    { repo: "vectara/open-rag-eval", title: "open-rag-eval", body: "RAG evaluation that works without golden answers. Handy when you have real traffic but no labelled set yet.", tags: ["Evaluation"] },
-    { repo: "lightonai/pylate", title: "PyLate", body: "Training and running late-interaction (ColBERT-style) retrievers. The most active home for multi-vector retrieval.", tags: ["Retrieval", "Training"] },
-    { repo: "agiresearch/A-mem", title: "A-MEM", body: "Agent memory organised as linked, evolving notes. A thoughtful alternative to flat vector memory.", tags: ["Agent memory"] },
-    { repo: "xiaowu0162/LongMemEval", title: "LongMemEval", body: "The benchmark I'd use for agent memory: updated facts, reasoning across sessions and over time, and knowing when to say 'I don't know'.", tags: ["Agent memory", "Evaluation"] },
     { repo: "getzep/graphiti", title: "Graphiti", body: "Temporal knowledge graphs where changed facts are invalidated, not deleted. The model for how I handle facts that change.", tags: ["Agent memory", "Graphs"] },
     { repo: "docling-project/docling", title: "Docling", body: "MIT-licensed document conversion that keeps headings, tables and reading order. Structure-aware chunking starts here.", tags: ["Documents", "OCR"] },
     { repo: "allenai/olmocr", title: "olmOCR", body: "An open OCR model and benchmark that holds up on hard pages, with published cost per million pages.", tags: ["OCR"] },

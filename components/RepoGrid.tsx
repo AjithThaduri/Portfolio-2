@@ -9,17 +9,16 @@ const GitHubMark = ({ className = "" }: { className?: string }) => (
 
 /** Cards linking to GitHub. `featured` renders larger cards for my own repos. */
 export const RepoGrid = ({ repos, featured = false }: { repos: RepoCard[]; featured?: boolean }) => (
-  <ul className={`grid gap-4 ${featured ? "md:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
+  <ul className={`grid gap-4 ${featured ? "md:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
     {repos.map((r, i) => {
       const [owner, name] = r.repo.split("/");
       return (
         <li key={r.repo}>
           <Reveal delay={0.03 * (i % 3)} className="h-full">
-            <a
-              href={`https://github.com/${r.repo}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`group flex h-full flex-col rounded-3xl border border-line bg-raised transition-all duration-500 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.35)] ${
+            {/* The whole card links to the repo (stretched link); the credit
+                link sits above it so both stay clickable without nesting. */}
+            <article
+              className={`group relative flex h-full flex-col rounded-3xl border border-line bg-raised transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/30 duration-500 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.35)] ${
                 featured ? "p-8" : "p-6"
               }`}
             >
@@ -33,18 +32,38 @@ export const RepoGrid = ({ repos, featured = false }: { repos: RepoCard[]; featu
                   ↗
                 </span>
               </span>
-              <span className={`mt-5 font-medium tracking-tight text-text group-hover:text-accent ${featured ? "text-2xl" : "text-lg"}`}>
-                {r.title}
-              </span>
-              <span className="mt-3 flex-1 text-sm font-light leading-relaxed text-muted">{r.body}</span>
-              <span className="mt-6 flex flex-wrap gap-1.5">
+              <h3 className={`mt-5 font-medium tracking-tight text-text group-hover:text-accent ${featured ? "text-2xl" : "text-lg"}`}>
+                <a
+                  href={`https://github.com/${r.repo}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="after:absolute after:inset-0 after:rounded-3xl after:content-[''] focus-visible:outline-none"
+                >
+                  {r.title}
+                </a>
+              </h3>
+              <p className="mt-3 flex-1 text-sm font-light leading-relaxed text-muted">{r.body}</p>
+              <div className="mt-6 flex flex-wrap items-center gap-1.5">
                 {r.tags.map((t) => (
                   <span key={t} className="rounded-full bg-surface px-2.5 py-1 font-mono text-[10px] text-faint">
                     {t}
                   </span>
                 ))}
-              </span>
-            </a>
+              </div>
+              {r.upstream && (
+                <div className="mt-5 border-t border-line pt-4">
+                  <a
+                    href={`https://github.com/${r.upstream}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative z-10 inline-flex items-center gap-1.5 text-xs text-faint transition-colors hover:text-text"
+                  >
+                    Original by <span className="font-medium text-muted">{r.upstream.split("/")[0]}</span>
+                    <span aria-hidden>↗</span>
+                  </a>
+                </div>
+              )}
+            </article>
           </Reveal>
         </li>
       );

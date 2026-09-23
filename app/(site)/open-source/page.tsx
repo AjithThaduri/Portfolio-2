@@ -30,6 +30,11 @@ export default function OpenSource() {
       </section>
 
       <Section tone="surface">
+        <SectionHead eyebrow="Also on my GitHub" title="Research code worth knowing." lede={OPEN_SOURCE.hostedIntro} />
+        <RepoGrid repos={OPEN_SOURCE.hosted} />
+      </Section>
+
+      <Section>
         <SectionHead eyebrow="Projects I rely on" title="Worth your attention." lede={OPEN_SOURCE.relyIntro} />
         <RepoGrid repos={OPEN_SOURCE.rely} />
       </Section>
