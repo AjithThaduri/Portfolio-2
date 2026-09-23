@@ -11,9 +11,9 @@ draft: true
 
 Standard <Term id="rag">RAG</Term> treats a document as a pile of interchangeable chunks. Ask a question, pull the eight most similar pieces, hand them to the model. For a short document, or a question with a single answer in a single place, that works.
 
-It falls apart on long documents — a 400-page medical record, a contract with its schedules, a technical manual — because many real questions aren't about one place:
+It falls apart on long documents — a 400-page annual report, a contract with its schedules, a technical manual — because many real questions aren't about one place:
 
-- **Global questions:** "What was the overall course of treatment?" No single chunk contains the answer.
+- **Global questions:** "What are the main risks this report describes?" No single chunk contains the answer.
 - **Cross-reference questions:** "Does the exclusion in section 9 apply to the case in schedule C?" The answer needs two distant parts read together.
 - **Where-is-it questions:** "Which section covers termination?" The answer is about the document's structure, which chunking threw away.
 
@@ -42,7 +42,7 @@ The fix is to keep the structure and give the system a map.
 ## Why each piece is there
 
 ### Keep the structure the document already has
-Long documents are almost always organised: chapters, sections, schedules, dated entries. That organisation is information — it tells you what belongs together and where things are. A layout-aware parser that keeps headings and page numbers is the foundation. If your parser flattens everything to text, fix that first.
+Long documents are almost always organised: chapters, sections, schedules, appendices. That organisation is information — it tells you what belongs together and where things are. A layout-aware parser that keeps headings and page numbers is the foundation. If your parser flattens everything to text, fix that first.
 
 ### Summaries answer the questions chunks can't
 A global question needs a view of the whole. Summarising bottom-up gives you that view at every level: a summary per section, per chapter, and for the document. This is close to the RAPTOR approach — recursive summarisation into a tree — except that for well-structured documents I build the tree from the document's own headings rather than by clustering.
@@ -72,7 +72,7 @@ Context windows are large now. If a document fits comfortably in one, and you'll
   caption="'Cost per query': more dots means cheaper. Whole-document context gets much cheaper with prompt caching if the same document is queried repeatedly."
 />
 
-The hierarchical design earns its complexity when documents are long, structured and queried many times — a case file an attorney returns to for weeks, a manual thousands of employees search.
+The hierarchical design earns its complexity when documents are long, structured and queried many times — a contract a team negotiates over for weeks, a manual thousands of employees search.
 
 ## A sketch of the query path
 

@@ -1,0 +1,132 @@
+---
+title: "Memory-aware agents: stop replaying the whole conversation"
+summary: "Most agents 'remember' by pasting the entire history into every request — which gets slow, expensive and eventually stops fitting. This design gives an agent tiers of memory, built from open-source parts, so each turn carries only what it needs."
+type: blueprint
+level: advanced
+status: tested
+topics: ["agents"]
+published: 2026-09-23
+draft: true
+---
+
+The simplest way to give an <Term id="agent">agent</Term> memory is to send it everything: every message, every tool result, every turn, on every request. It works beautifully for a demo. Then conversations get long. Each turn gets slower and more expensive, the important decision from forty turns ago gets buried under tool output, and eventually the history stops fitting in the <Term id="context-window">context window</Term> at all.
+
+The instinct is to add a vector database and call it memory. That helps less than people expect. Memory isn't one thing — it's several, with different jobs, and the design below keeps them apart.
+
+## First, an honest caveat
+
+Replaying the full history is often the most *accurate* option while histories are short. In the Mem0 paper's own results, a full-context baseline scored higher than every memory system tested — the memory systems won on latency and cost, not accuracy. Another benchmark found full context comfortably ahead for the first few dozen conversations.
+
+So my first rule: **keep full context until it hurts.** Build memory when latency, cost or window size forces you to — and when you do, keep a full-context baseline in your evals so you know what you're giving up.
+
+## The architecture
+
+<Flow
+  title="Tiered memory"
+  zones={[
+    { id: "prompt", label: "In every prompt", tone: "accent" },
+    { id: "store", label: "Stored, retrieved on demand", tone: "teal" },
+  ]}
+  stages={[
+    { id: "pinned", label: "Pinned", note: "profile · rules", zone: "prompt", detail: "A small, always-present block: who the user is, standing instructions, the current goal. Kept short and edited in place. Everything here costs tokens on every turn, so it earns its place or leaves." },
+    { id: "window", label: "Recent window", note: "last N turns, verbatim", zone: "prompt", detail: "The last several turns exactly as they happened, so the agent can follow the immediate thread without anything being lost to summarisation." },
+    { id: "summary", label: "Rolling summary", note: "what came before", zone: "prompt", detail: "A running summary of everything older than the window. Useful for continuity — but summaries compound errors, so it's a convenience, not the source of truth." },
+    { id: "episodes", label: "Episodes", note: "raw log, never edited", zone: "store", detail: "Every turn and tool result stored as-is, with timestamps. This is the ground truth everything else is derived from, and it's what you go back to when a summary or fact turns out wrong." },
+    { id: "facts", label: "Facts", note: "extracted, time-stamped", zone: "store", detail: "Small, specific statements pulled out of episodes — 'prefers weekly reports', 'deadline moved to Friday'. New facts are added alongside old ones with validity times, rather than overwriting them." },
+    { id: "procedures", label: "Procedures", note: "how to do things", zone: "store", detail: "Lessons about how to work with this user or task — formats that worked, approaches that failed. Updated rarely, in the background." },
+    { id: "assemble", label: "Assemble the turn", note: "within a budget", detail: "Each turn: pinned + window + summary, plus whatever facts, episodes and procedures retrieval returns for this request — all within a fixed token budget." },
+  ]}
+/>
+
+## The two paths that make it work
+
+### The write path: after the turn, in the background
+Memory is written *after* the agent replies, not while the user waits. A background job looks at the new turns alongside the rolling summary and extracts anything worth keeping. Doing this on the hot path adds latency to every single turn.
+
+The important decision is how to handle change. When a user says the deadline moved, you could overwrite the old fact — or add the new one and mark the old one as no longer valid. I add. Graphiti does this with facts that carry both "when it was true" and "when we learned it" timestamps, and Mem0 moved from overwriting to add-only in its 2026 redesign. Overwrites decided by a model lose information; history lets you answer "what did we think on Monday?"
+
+### The read path: before the turn, on a budget
+Before each turn, search memory with the current request — combining vector similarity, keyword matching and, if you have one, the entity graph — then merge and rerank. Take the best results up to a fixed token budget. Published systems retrieve somewhere between about 1.6 and 7 thousand tokens per turn, against full histories of 26 thousand to over 100 thousand.
+
+<Callout tone="tip" title="Tool output is the easiest win">
+Old tool results — search results, file contents, API responses — are usually the bulk of a long history, and the least likely to matter again. Clearing them from older turns is one of the lightest-touch ways to shrink context. Anthropic describe it as among the safest forms of compaction.
+</Callout>
+
+## The options, compared
+
+<Tradeoffs
+  columns={["Accuracy (long histories)", "Cost per turn", "Effort to build"]}
+  rows={[
+    { name: "Replay full history", cells: [2, 0, 3], best: "Short conversations; your eval baseline" },
+    { name: "Trim to last N turns", cells: [1, 3, 3], best: "Chat where old turns genuinely don't matter" },
+    { name: "Rolling summary", cells: [1, 3, 2], best: "Continuity on a budget — watch for drift" },
+    { name: "Files the agent reads and writes", cells: [2, 2, 3], best: "A strong, simple starting point" },
+    { name: "Tiered memory (this design)", cells: [3, 2, 1], best: "Long-lived agents, many sessions per user" },
+    { name: "Temporal knowledge graph", cells: [3, 2, 1], best: "Facts that change over time; relationship questions" },
+  ]}
+  caption="'Cost per turn' and 'Effort': more dots is better (cheaper, easier). Full history stays accurate until it stops fitting — then it fails completely."
+/>
+
+The "files" row deserves a mention. Letta found that an agent on a small model, simply storing its history in files and searching them, scored well on the LoCoMo memory benchmark. Before building anything elaborate, try giving the agent a folder of Markdown notes and tools to read and edit them.
+
+## An open-source stack
+
+Everything here runs self-hosted:
+
+- **Models:** any open-weights model served through vLLM, llama.cpp or Ollama for the agent itself. Use a *stronger* model for memory extraction than you might expect — Graphiti's own documentation warns that small models without structured output break ingestion.
+- **Storage:** Postgres with pgvector and full-text search covers episodes, facts and hybrid retrieval in one database. Qdrant is a good alternative for the vectors.
+- **Graph (optional):** Graphiti on Neo4j or FalkorDB when facts change over time and relationships matter.
+- **Frameworks:** Letta if you want the agent to manage its own memory; Mem0 as a memory layer beside an existing agent; LangGraph's store and LangMem if you're already in that ecosystem.
+
+## A sketch of the turn
+
+```python
+BUDGET = {"pinned": 800, "window": 6000, "summary": 1200, "retrieved": 4000}
+
+def run_turn(user_id, message):
+    mem = memory_for(user_id)                       # isolated per user
+    context = [
+        fit(mem.pinned(), BUDGET["pinned"]),
+        fit(mem.summary(), BUDGET["summary"]),
+        fit(mem.recent_turns(n=8), BUDGET["window"]),
+        fit(mem.search(message, kinds=("fact", "episode", "procedure")),
+            BUDGET["retrieved"]),                   # hybrid + rerank
+    ]
+    reply = agent.respond(context, message)
+    mem.log_episode(message, reply)                 # raw, never edited
+    background(extract_and_consolidate, user_id)    # write path, off the hot path
+    return reply
+
+def extract_and_consolidate(user_id):
+    mem = memory_for(user_id)
+    for fact in extract_facts(mem.summary(), mem.recent_turns(n=10)):
+        for old in mem.conflicting(fact):
+            old.valid_until = fact.valid_from       # invalidate, don't delete
+        mem.add_fact(fact)
+    mem.refresh_summary()
+```
+
+## What goes wrong
+
+- **Summary poisoning.** One wrong fact in a summary shapes every later turn. Keep raw episodes, and let the agent check a summary against them when it matters.
+- **Benchmarks you can't compare.** Memory vendors have publicly disputed each other's results on the same benchmark. Treat published scores as a hint and run your own evaluation — including the full-context baseline.
+- **One user's memory in another's prompt.** Scope every read and write by user (and by tenant). Make deletion real: a user who asks to be forgotten should be removable from every tier.
+- **Memory that never forgets.** Old, untouched facts crowd out useful ones. Decay by recency, expire what hasn't been used, and let consolidation merge duplicates.
+- **Clearing context breaks caching.** Removing old turns invalidates prompt caches. Clear in larger batches, less often, so the savings outweigh the cost of rebuilding the cache.
+
+## How to evaluate it
+
+- **LongMemEval** tests what matters most in practice: pulling facts from long histories, reasoning across sessions and over time, handling updated facts, and knowing when to say "I don't know".
+- **Your own conversations.** Replay real (consented, anonymised) sessions and ask questions whose answers you know.
+- **Always against full context.** If your memory system can't get close to the full-history baseline on accuracy, the latency savings may not be worth it.
+
+## Sources and further reading
+
+- Packer et al. — *MemGPT: Towards LLMs as Operating Systems* (2023); Letta documentation on memory and sleep-time agents
+- Chhikara et al. — *Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory* (2025), and Mem0's 2026 algorithm update
+- Rasmussen et al. — *Zep: A Temporal Knowledge Graph Architecture for Agent Memory* (2025); Graphiti
+- Park et al. — *Generative Agents* (2023) — recency, importance and relevance scoring
+- Xu et al. — *A-MEM: Agentic Memory for LLM Agents* (2025)
+- Wu et al. — *LongMemEval* (ICLR 2025); Maharana et al. — *LoCoMo* (2024)
+- Anthropic — *Effective context engineering for AI agents* (2025), memory tool and context editing docs
+- OpenAI — Agents SDK sessions and the session-memory cookbook
