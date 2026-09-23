@@ -116,7 +116,7 @@ export const Tradeoffs = ({
               {r.cells.map((c, i) => (
                 <td key={i} className="px-5 py-4 text-muted">
                   {typeof c === "number" ? (
-                    <span className="inline-flex gap-1" aria-label={`${c} of 3`}>
+                    <span role="img" className="inline-flex gap-1" aria-label={`${c} of 3`}>
                       {[1, 2, 3].map((d) => (
                         <span
                           key={d}

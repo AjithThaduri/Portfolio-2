@@ -58,7 +58,7 @@ export default async function CapabilityPage({ params }: Props) {
       {(flagships.length > 0 || projects.length > 0) && (
         <section className="bg-surface px-6 py-20 sm:px-10 md:py-28">
           <div className="mx-auto max-w-6xl">
-            <Eyebrow>Work in this area</Eyebrow>
+            <Eyebrow as="h2">Work in this area</Eyebrow>
             <div className="mt-10 grid gap-4 md:grid-cols-2">
               {flagships.map((f) => (
                 <Link
@@ -90,7 +90,7 @@ export default async function CapabilityPage({ params }: Props) {
       {c.code && c.code.length > 0 && (
         <section className="px-6 py-20 sm:px-10 md:py-28">
           <div className="mx-auto max-w-6xl">
-            <Eyebrow>Code you can run</Eyebrow>
+            <Eyebrow as="h2">Code you can run</Eyebrow>
             <ul className="mt-10 grid gap-4 md:grid-cols-2">
               {c.code.map((x) => (
                 <li key={x.href}>
@@ -116,7 +116,7 @@ export default async function CapabilityPage({ params }: Props) {
       {blueprints.length > 0 && (
         <section className="border-t border-line px-6 py-20 sm:px-10 md:py-28">
           <div className="mx-auto max-w-6xl">
-            <Eyebrow>Blueprints on this</Eyebrow>
+            <Eyebrow as="h2">Blueprints on this</Eyebrow>
             <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {blueprints.map((b) => (
                 <BlueprintCard key={b.slug} b={b} />
@@ -128,7 +128,7 @@ export default async function CapabilityPage({ params }: Props) {
 
       <section className="border-t border-line px-6 py-20 sm:px-10 md:py-28">
         <div className="mx-auto max-w-6xl">
-          <Eyebrow>Other areas</Eyebrow>
+          <Eyebrow as="h2">Other areas</Eyebrow>
           <div className="mt-10">
             <CapabilityGrid exclude={c.slug} />
           </div>

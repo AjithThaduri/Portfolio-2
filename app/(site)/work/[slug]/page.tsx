@@ -57,7 +57,7 @@ export default async function CaseStudy({ params }: Props) {
       <header className="relative overflow-hidden px-6 pb-14 pt-36 sm:px-10 md:pt-44">
         <Glow />
         <div className="relative mx-auto max-w-6xl">
-          <Reveal>
+          <Reveal fade={false}>
             <nav aria-label="Breadcrumb" className="font-mono text-[11px] uppercase tracking-[0.2em]">
               <Link href="/" className="text-faint transition-colors hover:text-text">
                 Home
@@ -71,13 +71,13 @@ export default async function CaseStudy({ params }: Props) {
             </nav>
           </Reveal>
 
-          <Reveal delay={0.06}>
+          <Reveal fade={false} delay={0.06}>
             <h1 className="mt-8 max-w-4xl text-balance text-4xl font-medium leading-[1.05] tracking-[-0.035em] text-text sm:text-5xl md:text-[4rem]">
               {p.title}
             </h1>
           </Reveal>
 
-          <Reveal delay={0.12}>
+          <Reveal fade={false} delay={0.12}>
             <dl className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-3">
               {[
                 { k: "Sector", v: p.sector },
@@ -92,7 +92,7 @@ export default async function CaseStudy({ params }: Props) {
             </dl>
           </Reveal>
 
-          <Reveal delay={0.18}>
+          <Reveal fade={false} delay={0.18}>
             <div className="mt-6 rounded-3xl bg-surface px-7 py-8 sm:px-10 sm:py-10">
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">
                 In plain terms

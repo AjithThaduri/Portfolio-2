@@ -3,11 +3,11 @@ import { ReactNode } from "react";
 import { Reveal } from "./Reveal";
 
 /** Small mono label with a short accent rule — used above every heading. */
-export const Eyebrow = ({ children }: { children: ReactNode }) => (
-  <p className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.2em] text-accent">
+export const Eyebrow = ({ children, as: Tag = "p" }: { children: ReactNode; as?: "p" | "h2" }) => (
+  <Tag className="flex items-center gap-3 font-mono text-[11px] font-normal uppercase tracking-[0.2em] text-accent">
     <span aria-hidden className="h-px w-6 bg-accent-vivid" />
     {children}
-  </p>
+  </Tag>
 );
 
 export const SectionHead = ({
@@ -71,7 +71,7 @@ export const PageHeader = ({
   <header className="relative overflow-hidden px-6 pb-16 pt-36 sm:px-10 md:pb-24 md:pt-44">
     <Glow />
     <div className="relative mx-auto max-w-6xl">
-      <Reveal>
+      <Reveal fade={false}>
         <nav aria-label="Breadcrumb" className="font-mono text-[11px] uppercase tracking-[0.2em]">
           <Link href="/" className="text-faint transition-colors hover:text-text">
             Home
@@ -80,13 +80,13 @@ export const PageHeader = ({
           <span className="text-accent">{crumb}</span>
         </nav>
       </Reveal>
-      <Reveal delay={0.06}>
+      <Reveal fade={false} delay={0.06}>
         <h1 className="mt-8 max-w-4xl text-balance text-4xl font-medium leading-[1.05] tracking-[-0.035em] text-text sm:text-5xl md:text-[4rem]">
           {title}
         </h1>
       </Reveal>
       {lede && (
-        <Reveal delay={0.12}>
+        <Reveal fade={false} delay={0.12}>
           <p className="mt-8 max-w-2xl text-pretty text-lg font-light leading-relaxed text-muted md:text-xl">
             {lede}
           </p>

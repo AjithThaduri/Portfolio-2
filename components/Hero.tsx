@@ -72,9 +72,11 @@ export const Hero = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [router]);
 
+  // Slide without fading: the headline and lede are the largest paint on
+  // the page, so they must be visible before JavaScript runs.
   const rise = (delay: number) => ({
-    initial: { opacity: 0, y: 24 },
-    animate: { opacity: 1, y: 0 },
+    initial: { y: 18 },
+    animate: { y: 0 },
     transition: { duration: 0.9, delay, ease: EASE },
   });
 
@@ -197,8 +199,8 @@ export const Hero = () => {
 
         {/* ------------------------------------------------ portrait scene */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ scale: 0.97 }}
+          animate={{ scale: 1 }}
           transition={{ duration: 1.1, delay: 0.2, ease: EASE }}
           className="relative mx-auto w-full max-w-[460px]"
         >
@@ -272,7 +274,7 @@ const PortraitScene = () => {
             src="/img/portrait.webp"
             alt="Portrait of Ajith Thaduri"
             fill
-            sizes="(max-width: 1024px) 80vw, 340px"
+            sizes="(max-width: 640px) 78vw, 340px"
             className="object-cover"
             priority
           />
