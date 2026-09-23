@@ -627,7 +627,11 @@ export type Capability = {
   /** What I actually do in this area — two or three sentences. */
   body: string;
   points: string[];
+  /** Public code of mine that shows this capability. */
+  code?: { label: string; note: string; href: string }[];
 };
+
+const GH = "https://github.com/AjithThaduri";
 
 export const CAPABILITIES: Capability[] = [
   {
@@ -641,6 +645,12 @@ export const CAPABILITIES: Capability[] = [
       "Hybrid search, reranking and citation-grounded answers",
       "Retrieval evaluation — measuring whether the right passages come back",
     ],
+    code: [
+      { label: "blueprints / chunking", note: "Compare chunking strategies on your own documents, with Recall@k and MRR.", href: `${GH}/blueprints/blob/main/src/blueprints/chunking.py` },
+      { label: "blueprints / longdoc", note: "Long-document retrieval with a heading tree, routing and ordered excerpts.", href: `${GH}/blueprints/blob/main/src/blueprints/longdoc.py` },
+      { label: "blueprints / ocr", note: "Tiered OCR routing that trusts good text layers and escalates hard pages.", href: `${GH}/blueprints/tree/main/src/blueprints/ocr` },
+      { label: "rag-eval", note: "Retrieval metrics and a CI gate that catches real regressions.", href: `${GH}/rag-eval` },
+    ],
   },
   {
     slug: "agents",
@@ -652,6 +662,9 @@ export const CAPABILITIES: Capability[] = [
       "Human-in-the-loop checkpoints and escalation rules",
       "Workflow automation with n8n where a full agent is overkill",
       "MCP and function-calling integrations with existing systems",
+    ],
+    code: [
+      { label: "blueprints / memory", note: "Tiered agent memory: time-stamped facts, per-user isolation, token budgets.", href: `${GH}/blueprints/tree/main/src/blueprints/memory` },
     ],
   },
   {
@@ -712,6 +725,9 @@ export const CAPABILITIES: Capability[] = [
       "LLM-as-judge with rubrics, checked against human grading",
       "Retrieval metrics alongside answer quality",
       "Evals wired into CI so regressions can't ship",
+    ],
+    code: [
+      { label: "rag-eval", note: "Paired-bootstrap regression gate and an LLM judge calibrated against human labels.", href: `${GH}/rag-eval` },
     ],
   },
 ];

@@ -87,8 +87,34 @@ export default async function CapabilityPage({ params }: Props) {
         </section>
       )}
 
-      {blueprints.length > 0 && (
+      {c.code && c.code.length > 0 && (
         <section className="px-6 py-20 sm:px-10 md:py-28">
+          <div className="mx-auto max-w-6xl">
+            <Eyebrow>Code you can run</Eyebrow>
+            <ul className="mt-10 grid gap-4 md:grid-cols-2">
+              {c.code.map((x) => (
+                <li key={x.href}>
+                  <a
+                    href={x.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex h-full flex-col rounded-3xl border border-line bg-raised p-7 transition-all duration-500 hover:-translate-y-1 hover:border-accent/50"
+                  >
+                    <span className="flex items-center justify-between gap-3 font-mono text-sm text-text group-hover:text-accent">
+                      {x.label}
+                      <span aria-hidden className="text-faint transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5">↗</span>
+                    </span>
+                    <span className="mt-3 text-sm font-light leading-relaxed text-muted">{x.note}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {blueprints.length > 0 && (
+        <section className="border-t border-line px-6 py-20 sm:px-10 md:py-28">
           <div className="mx-auto max-w-6xl">
             <Eyebrow>Blueprints on this</Eyebrow>
             <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
