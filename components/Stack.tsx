@@ -3,23 +3,22 @@ import { Reveal } from "./Reveal";
 import { Section, SectionHead } from "./Section";
 
 export const Stack = () => (
-  <Section id="stack" tone="surface" texture="grid" ghost="06">
-    <SectionHead
-      n="06"
-      title="Stack"
-      lede="Tools I have actually shipped with. Deliberately not a list of everything I have read about."
-    />
+  <Section id="stack">
+    <SectionHead eyebrow={STACK.title} title={STACK.lede} />
 
-    <div className="grid gap-x-12 gap-y-12 border-t border-line pt-12 sm:grid-cols-2 lg:grid-cols-3">
-      {STACK.map((g, i) => (
-        <Reveal key={g.group} delay={0.03 * i}>
-          <div>
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {STACK.groups.map((g, i) => (
+        <Reveal key={g.group} delay={0.03 * i} className="h-full">
+          <div className="h-full rounded-3xl border border-line p-7">
             <h3 className="font-mono text-[11px] uppercase tracking-[0.18em] text-accent">
               {g.group}
             </h3>
-            <ul className="mt-5 space-y-2 border-l border-line pl-5">
+            <ul className="mt-5 flex flex-wrap gap-2">
               {g.items.map((it) => (
-                <li key={it} className="text-sm font-light text-muted">
+                <li
+                  key={it}
+                  className="rounded-full bg-surface px-3 py-1.5 text-sm font-light text-muted"
+                >
                   {it}
                 </li>
               ))}

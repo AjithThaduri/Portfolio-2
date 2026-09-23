@@ -1,0 +1,122 @@
+---
+title: "RAG for long documents: give it a map"
+summary: "Ordinary RAG answers 'find me the paragraph' well and 'what does this 400-page file say overall' badly. Keeping the document's structure, with summaries at each level, lets one system answer both."
+type: blueprint
+status: tested
+topics: ["retrieval"]
+published: 2026-09-23
+draft: false
+code: src/blueprints/longdoc.py
+repos:
+  - repo: parthsarthi03/raptor
+    note: "Official RAPTOR implementation: recursive summary trees."
+  - repo: VectifyAI/PageIndex
+    note: "Table-of-contents tree navigation without vectors (benchmarks self-reported)."
+  - repo: run-llama/llama_index
+    note: "Hierarchical and auto-merging retrievers."
+  - repo: docling-project/docling
+    note: "Layout-aware parsing that keeps headings, pages and tables."
+  - repo: microsoft/graphrag
+    note: "Corpus-wide summarisation when questions span many documents."
+changelog:
+  - date: 2026-09-23
+    note: First published.
+---
+
+Standard <Term id="rag">RAG</Term> treats a document as a bag of interchangeable chunks. That's fine for short documents and for questions with one answer in one place. Long documents (an annual report, a contract with schedules, a technical manual) get three kinds of question it handles badly:
+
+- **Global:** "What are the main risks this report describes?" No chunk contains the answer.
+- **Cross-reference:** "Does the exclusion in section 9 apply to schedule C?" Two distant parts need reading together.
+- **Structural:** "Which section covers termination?" The answer is the document's structure, which chunking discarded.
+
+<FieldNote title="In production">
+The evidence here is consistent. The GraphRAG paper states that RAG fails on global questions asked of a whole corpus. The Self-Route study found long context beat RAG by roughly 4 to 13 points across three models, and RAG's failures clustered in multi-step reasoning, broad or ambiguous questions, and implicit questions that need the whole document. Put those question types in your eval set before deciding whether you need this design.
+</FieldNote>
+
+## The design
+
+<Flow
+  title="Long-document pipeline"
+  zones={[
+    { id: "ingest", label: "Once per document", tone: "teal" },
+    { id: "query", label: "Per question", tone: "accent" },
+  ]}
+  stages={[
+    { id: "parse", label: "Parse", note: "layout-aware", zone: "ingest", detail: "Extract text with headings, heading levels, page numbers, tables and lists intact. OCR scanned pages first. Everything later depends on this." },
+    { id: "tree", label: "Build the tree", note: "doc, section, passage", zone: "ingest", detail: "Turn the heading hierarchy into a tree. Each node knows its parent, children, page range and position in reading order." },
+    { id: "summarise", label: "Summarise upwards", zone: "ingest", detail: "Summarise passage groups, then summarise those summaries up the tree, ending with one for the whole document." },
+    { id: "index", label: "Index both levels", note: "hybrid", zone: "ingest", detail: "Index passages and summaries together with vector and keyword search. Every entry points back to its node." },
+    { id: "route", label: "Route", note: "local or global?", zone: "query", detail: "Decide whether the question is local, cross-reference or global. Each takes a different path." },
+    { id: "retrieve", label: "Retrieve, drill down", zone: "query", detail: "Global questions start from summaries, local ones from passages. A summary hit can expand into its children when detail is needed." },
+    { id: "assemble", label: "Assemble in order", zone: "query", detail: "Sort retrieved pieces by position in the document, not by score, and label each with its section path and pages." },
+    { id: "answer", label: "Answer, cite", zone: "query", detail: "Answer from the assembled context, citing section and page. Uncited claims are flagged." },
+  ]}
+/>
+
+Four choices do most of the work.
+
+**Keep the structure the document already has.** Headings and page numbers tell you what belongs together. If your parser flattens everything to plain text, fix that before anything else.
+
+**Summaries answer what chunks can't.** A global question needs a view of the whole, and bottom-up summaries give you one at every level. This is close to RAPTOR's recursive summarisation. The difference is that for well-structured documents I build the tree from the headings rather than by clustering.
+
+**Route, so simple questions stay simple.** Most questions are local. Sending them down the summary path costs more and often answers worse, because summaries drop detail.
+
+<FieldNote title="In production">
+Start with rules; a perfect classifier isn't required. Adaptive-RAG's classifier was right only about 54–66% of the time per class, yet matched the quality of always taking the multi-step path (F1 50.91 against 50.87), because per-query time ranged from 0.35 seconds without retrieval to 27 seconds multi-step. Self-Route found RAG and long context gave identical answers on 63% of queries, which is why routing saved 39–65% of tokens at a small quality cost. The savings come from avoiding the expensive path, not from classifying perfectly.
+</FieldNote>
+
+**Re-sort by position.** Retrieval ranks by similarity. Pasted in that order, the model reads references before the thing they refer to. Sorting by document position with a breadcrumb on each piece is one of the cheapest improvements here.
+
+## Should you build it?
+
+Often not. Context windows are large, and Anthropic's own guidance is that up to around 200,000 tokens can go straight into the prompt, with caching if you'll ask more than once.
+
+<Tradeoffs
+  columns={["Global questions", "Local precision", "Cost per query", "Simplicity"]}
+  rows={[
+    { name: "Flat chunk RAG", cells: [1, 3, 3, 3], best: "Short documents, lookup questions" },
+    { name: "Hierarchical (this design)", cells: [3, 3, 2, 1], best: "Long, structured, queried often" },
+    { name: "Whole document in context", cells: [3, 2, 1, 3], best: "Fits the window, few questions" },
+    { name: "Map-reduce summarisation", cells: [3, 1, 1, 2], best: "One-off reports" },
+  ]}
+  caption="More dots is better; for cost, cheaper. Prompt caching makes the whole-document option much cheaper for repeated questions."
+/>
+
+The hierarchical version earns its complexity when documents are long, structured and queried many times: a contract a team works through over weeks, or a manual thousands of people search.
+
+## The query path, sketched
+
+```python
+def answer(question, doc_id):
+    kind = route(question)                  # local | cross_ref | global
+    if kind == "global":
+        nodes = search(question, doc_id, level="summary", k=6)
+    elif kind == "cross_ref":
+        nodes = expand_to_sections(search(question, doc_id, level="any", k=12))
+    else:
+        nodes = search(question, doc_id, level="passage", k=8)
+
+    nodes = sorted(dedupe(nodes), key=lambda n: n.position)
+    context = "\n\n".join(f"[{n.section_path} · p.{n.pages}]\n{n.text}" for n in nodes)
+    return generate_with_citations(question, context)
+```
+
+## Where it goes wrong
+
+Summaries drift: they state things the source doesn't. I keep them as extractive as possible and let a summary hit expand to source text before the final answer. Parsing fails silently: a missed heading merges two sections and nobody notices until answers get strange. And updates are expensive unless you only rebuild summaries on the path from the changed node to the root.
+
+<FieldNote title="In production">
+Treat each summary as a set of claims and check them against the summary's own source chunks, not against the summary above it. The FABLES study of book-length summaries found no automatic rater that reliably caught unfaithful claims, so an LLM judge alone isn't enough. Store source IDs on every summary node, verify claims with NLI or question-answer consistency, and keep leaf summaries extractive where accuracy matters. The companion code defaults to extractive summaries, and a test fails if a summary contains a sentence the source doesn't.
+</FieldNote>
+
+Build your eval set with this in mind. Most RAG eval sets are full of find-the-fact questions because they're easy to write. Make a third of yours global or cross-reference, or you'll never see the failures this design exists for.
+
+## Sources
+
+- Sarthi et al., *RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval* (2024)
+- Anthropic, *Introducing Contextual Retrieval* (2024), on skipping RAG for small knowledge bases
+- LlamaIndex docs on hierarchical and auto-merging retrieval
+- Edge et al., *From Local to Global: A Graph RAG Approach* (2024)
+- Li et al., *Retrieval Augmented Generation or Long-Context LLMs?* (Self-Route, 2024)
+- Jeong et al., *Adaptive-RAG* (2024)
+- Kim et al., *FABLES: Evaluating faithfulness and content selection in book-length summarization* (2024)

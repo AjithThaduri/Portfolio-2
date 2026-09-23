@@ -38,7 +38,7 @@ const hexToRgb = (hex: string): RGB => {
 
 const rgba = (c: RGB, a: number) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 
-export const HeroCanvas = () => {
+export const PipelineCanvas = () => {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

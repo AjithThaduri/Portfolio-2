@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, IBM_Plex_Mono } from "next/font/google";
+import { Inter, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Analytics } from "@vercel/analytics/next";
@@ -8,6 +8,14 @@ import { SITE, FAQ } from "@/lib/content";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const instrument = Instrument_Serif({
+  variable: "--font-instrument",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -21,11 +29,11 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: "Ajith Thaduri — AI Engineer, Consultant & Instructor",
+    default: "Ajith Thaduri — AI Engineer",
     template: "%s | Ajith Thaduri",
   },
   description:
-    "I build agentic AI systems, retrieval architectures and guardrail-driven LLM platforms for government, healthcare and legal environments — where the data is regulated and the output has to hold up.",
+    "I build AI systems for teams handling sensitive data — agents, retrieval and self-hosted models for healthcare, legal and government work, designed so every answer can be traced and checked.",
   keywords: [
     "Ajith Thaduri",
     "AI Engineer",
@@ -45,16 +53,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: SITE.url,
-    title: "Ajith Thaduri — AI Engineer, Consultant & Instructor",
+    title: "Ajith Thaduri — AI Engineer",
     description:
-      "Agentic systems, retrieval architectures and guardrail-driven LLM platforms, shipped into regulated environments.",
+      "AI systems for teams handling sensitive data — in healthcare, legal and government work.",
     siteName: "Ajith Thaduri",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ajith Thaduri — AI Engineer, Consultant & Instructor",
+    title: "Ajith Thaduri — AI Engineer",
     description:
-      "Agentic systems, retrieval architectures and guardrail-driven LLM platforms, shipped into regulated environments.",
+      "AI systems for teams handling sensitive data — in healthcare, legal and government work.",
   },
   robots: {
     index: true,
@@ -148,7 +156,7 @@ export default function RootLayout({
         "@type": "ProfilePage",
         "@id": `${SITE.url}#profile`,
         url: SITE.url,
-        name: "Ajith Thaduri — AI Engineer, Consultant & Instructor",
+        name: "Ajith Thaduri — AI Engineer",
         isPartOf: { "@id": `${SITE.url}#website` },
         about: { "@id": `${SITE.url}#person` },
         mainEntity: { "@id": `${SITE.url}#person` },
@@ -178,7 +186,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${plexMono.variable} bg-ink text-text antialiased`}
+        className={`${inter.variable} ${plexMono.variable} ${instrument.variable} grain bg-ink text-text antialiased`}
       >
         <script
           type="application/ld+json"

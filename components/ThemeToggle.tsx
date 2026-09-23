@@ -48,7 +48,7 @@ export const ThemeToggle = ({ className = "" }: { className?: string }) => {
       onClick={toggle}
       aria-label={label}
       title={label}
-      className={`flex h-8 w-8 items-center justify-center border border-line text-muted transition-colors hover:border-accent hover:text-accent ${className}`}
+      className={`flex h-9 w-9 items-center justify-center rounded-full border border-line text-muted transition-colors hover:border-accent hover:text-accent ${className}`}
     >
       {mode === "dark" ? (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>

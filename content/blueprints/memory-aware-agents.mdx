@@ -1,0 +1,163 @@
+---
+title: "Agent memory without replaying the whole conversation"
+summary: "Most agents remember by pasting the entire history into every request, which gets slow, expensive and eventually stops fitting. This design splits memory into tiers, built from open-source parts, so each turn carries only what it needs."
+type: blueprint
+status: tested
+topics: ["agents"]
+published: 2026-09-23
+draft: false
+code: src/blueprints/memory
+repos:
+  - repo: letta-ai/letta
+    note: "Agents that manage their own memory (MemGPT lineage), with background consolidation."
+  - repo: mem0ai/mem0
+    note: "A memory layer beside an existing agent; self-hostable."
+  - repo: getzep/graphiti
+    note: "Temporal knowledge graph with bi-temporal facts."
+  - repo: langchain-ai/langgraph
+    note: "Short-term checkpoints and a long-term memory store."
+  - repo: langchain-ai/langmem
+    note: "Extraction and consolidation for semantic, episodic and procedural memory."
+  - repo: agiresearch/A-mem
+    note: "Zettelkasten-style agentic memory (research code)."
+  - repo: pgvector/pgvector
+    note: "Vector search inside Postgres, next to full-text search."
+  - repo: qdrant/qdrant
+    note: "A dedicated vector database if you'd rather separate it."
+  - repo: xiaowu0162/LongMemEval
+    note: "Benchmark for long-term memory, including updated facts and abstention."
+changelog:
+  - date: 2026-09-23
+    note: First published.
+---
+
+The easy way to give an <Term id="agent">agent</Term> memory is to send it everything, every turn. It works well until conversations get long. Then each turn gets slower and costs more, a decision from forty turns ago gets buried under tool output, and eventually the history doesn't fit in the <Term id="context-window">context window</Term> at all.
+
+Adding a vector database helps less than people expect, because memory isn't one thing. What the user prefers, what happened last Tuesday and how to format a report are different kinds of memory, and they need different handling.
+
+<FieldNote title="In production">
+Trouble starts earlier than the context window suggests. NVIDIA's RULER found effective context around half the advertised length for several models (64K of 128K). In NoLiMa, 11 models fell below half their short-context accuracy at 32K tokens when the question and answer didn't share keywords. Chroma's context-rot study found focused inputs of about 300 tokens scored well above full 113K-token histories on LongMemEval. Budget for degradation somewhere around 32K–64K tokens, and expect latency and cost to show it first.
+</FieldNote>
+
+## Before building anything
+
+Full history is often the most accurate option while conversations are short. In the Mem0 paper's own results, the full-context baseline beat every memory system on accuracy; the memory systems won on latency and cost. Another benchmark found full context well ahead for the first few dozen conversations.
+
+So I keep full context until it becomes a problem, and when I replace it I keep a full-context baseline in the evals, so I know what the savings cost.
+
+## Tiers
+
+<Flow
+  title="Tiered memory"
+  zones={[
+    { id: "prompt", label: "In every prompt", tone: "accent" },
+    { id: "store", label: "Stored, retrieved on demand", tone: "teal" },
+  ]}
+  stages={[
+    { id: "pinned", label: "Pinned", note: "profile, rules", zone: "prompt", detail: "Who the user is, standing instructions, the current goal. Short and edited in place, because it costs tokens every turn." },
+    { id: "window", label: "Recent turns", note: "verbatim", zone: "prompt", detail: "The last several turns exactly as they happened, so the immediate thread is never lost to summarisation." },
+    { id: "summary", label: "Rolling summary", zone: "prompt", detail: "A running summary of everything older than the window. Useful for continuity, but summaries compound mistakes, so it isn't the source of truth." },
+    { id: "episodes", label: "Episodes", note: "raw, never edited", zone: "store", detail: "Every turn and tool result stored as-is with timestamps. The ground truth that facts and summaries are derived from." },
+    { id: "facts", label: "Facts", note: "time-stamped", zone: "store", detail: "Short statements extracted from episodes, like 'prefers weekly reports'. New facts are added next to old ones with validity dates rather than replacing them." },
+    { id: "procedures", label: "Procedures", zone: "store", detail: "Lessons about how to work with this user or task: formats that worked, approaches that didn't. Updated rarely, in the background." },
+    { id: "assemble", label: "Assemble", note: "on a budget", detail: "Each turn: pinned, recent turns and summary, plus whatever retrieval returns from the stores for this request, all inside a fixed token budget." },
+  ]}
+/>
+
+### Writing memory
+
+Memory gets written after the agent replies, by a background job, so the user never waits for it. The job reads the new turns alongside the rolling summary and extracts what's worth keeping.
+
+The decision that matters is what happens when something changes. If the user says the deadline moved, I add the new fact and mark the old one as no longer valid, instead of overwriting it. Graphiti stores two timestamps per fact (when it was true, and when the system learned it), and Mem0 switched from overwriting to add-only in its 2026 redesign. Overwrites decided by a model lose information you'll want later.
+
+### Reading memory
+
+Before each turn, search the stores with the current request using vector similarity, keyword match and, if you have one, the entity graph. Merge, rerank, and take results up to a fixed budget. The published systems retrieve roughly 1.6 to 7 thousand tokens per turn, against full histories of 26 thousand to over 100 thousand.
+
+<Callout tone="tip" title="Start with old tool output">
+Old tool results are usually most of a long history and rarely matter again. Clearing them from older turns is the lightest way to shrink context; Anthropic call it one of the safest forms of compaction.
+</Callout>
+
+<FieldNote title="In production">
+Design against four failures. Poisoning: in 2024 a prompt injection in untrusted content wrote persistent instructions into ChatGPT's memory (since fixed), so untrusted content should never write memory directly. Leakage: isolate storage per user and validate every path; Anthropic's memory-tool docs call out path traversal specifically. Stale facts: invalidate superseded facts with timestamps, as Graphiti does. Over-remembering: cap sizes and expire what hasn't been used. The companion code implements the last three, with a test for each.
+</FieldNote>
+
+## Options
+
+<Tradeoffs
+  columns={["Accuracy, long histories", "Cheap per turn", "Easy to build"]}
+  rows={[
+    { name: "Replay full history", cells: [2, 0, 3], best: "Short conversations; eval baseline" },
+    { name: "Last N turns only", cells: [1, 3, 3], best: "When old turns don't matter" },
+    { name: "Rolling summary", cells: [1, 3, 2], best: "Continuity on a budget" },
+    { name: "Files the agent reads and writes", cells: [2, 2, 3], best: "A simple, strong start" },
+    { name: "Tiered memory (this design)", cells: [3, 2, 1], best: "Long-lived agents, many sessions" },
+    { name: "Temporal knowledge graph", cells: [3, 2, 1], best: "Facts that change; relationships" },
+  ]}
+  caption="More dots is better. Full history stays accurate until it stops fitting, then fails outright."
+/>
+
+The files option is worth trying first. Letta reported that an agent on a small model, keeping its history in files it could search, scored well on the LoCoMo memory benchmark. A folder of Markdown notes and tools to read and edit them goes a long way.
+
+## An open-source stack
+
+- **Models:** any open-weights model on vLLM, llama.cpp or Ollama. Give memory extraction a stronger model than you'd expect; Graphiti's docs warn that small models without structured output break ingestion.
+- **Storage:** Postgres with pgvector and full-text search handles episodes, facts and hybrid search in one place. Qdrant if you'd rather keep vectors separate.
+- **Graph, optionally:** Graphiti on Neo4j or FalkorDB, when facts change over time and relationships matter.
+- **Frameworks:** Letta if the agent should manage its own memory, Mem0 as a layer beside an existing agent, LangGraph's store and LangMem if you're already in that ecosystem.
+
+<FieldNote title="In production">
+Default to Postgres with pgvector. Keeping memory next to your users and tenants makes isolation and deletion simple, and published benchmarks (from a Postgres vendor, so read them accordingly) show pgvector-based setups competitive with dedicated vector databases at tens of millions of vectors. Add a graph only when you need to reason over how facts change or relate; Graphiti needs Neo4j or FalkorDB and a model with structured output on every write. Letta's result that plain file tools scored 74% on LoCoMo is a reminder that retrieval quality matters more than the store.
+</FieldNote>
+
+## One turn, sketched
+
+```python
+BUDGET = {"pinned": 800, "summary": 1200, "window": 6000, "retrieved": 4000}
+
+def run_turn(user_id, message):
+    mem = memory_for(user_id)                    # isolated per user
+    context = [
+        fit(mem.pinned(), BUDGET["pinned"]),
+        fit(mem.summary(), BUDGET["summary"]),
+        fit(mem.recent_turns(n=8), BUDGET["window"]),
+        fit(mem.search(message), BUDGET["retrieved"]),
+    ]
+    reply = agent.respond(context, message)
+    mem.log_episode(message, reply)
+    background(consolidate, user_id)             # off the hot path
+    return reply
+
+def consolidate(user_id):
+    mem = memory_for(user_id)
+    for fact in extract_facts(mem.summary(), mem.recent_turns(n=10)):
+        for old in mem.conflicting(fact):
+            old.valid_until = fact.valid_from    # invalidate, don't delete
+        mem.add_fact(fact)
+    mem.refresh_summary()
+```
+
+## Failure modes
+
+**Summary poisoning.** One wrong fact in the summary shapes every turn after it. Keep the raw episodes and check against them when it matters.
+
+**Leaking between users.** Scope every read and write by user and tenant, and make deletion real across every tier.
+
+**Never forgetting.** Stale facts crowd out useful ones. Decay by recency, expire what hasn't been touched, merge duplicates during consolidation.
+
+**Breaking the prompt cache.** Every time you clear old turns, cached prompts are invalidated. Clear less often, in bigger batches.
+
+**Trusting published scores.** Memory vendors have publicly disputed each other's numbers on the same benchmark. Run your own evaluation, full-context baseline included. LongMemEval is a good one to start with: it tests extraction from long histories, reasoning across sessions and over time, updated facts, and knowing when to say "I don't know".
+
+## Sources
+
+- Packer et al., *MemGPT: Towards LLMs as Operating Systems* (2023); Letta docs on memory and sleep-time agents
+- Chhikara et al., *Mem0* (2025), and Mem0's 2026 algorithm update
+- Rasmussen et al., *Zep: A Temporal Knowledge Graph Architecture for Agent Memory* (2025)
+- Park et al., *Generative Agents* (2023)
+- Xu et al., *A-MEM: Agentic Memory for LLM Agents* (2025)
+- Wu et al., *LongMemEval* (ICLR 2025); Maharana et al., *LoCoMo* (2024)
+- Anthropic, *Effective context engineering for AI agents* (2025); OpenAI Agents SDK session docs
+- Hsieh et al., *RULER* (NVIDIA, 2024); Modarressi et al., *NoLiMa* (2025); Chroma, *Context Rot* (2025)
+- Rehberger, *SpAIware* — persistent memory injection in ChatGPT (2024)
+- Anthropic memory tool documentation; Timescale, *pgvector vs Pinecone* (vendor benchmark)

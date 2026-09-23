@@ -1,0 +1,147 @@
+---
+title: "Chunking strategies, compared"
+summary: "How you cut documents into pieces decides what your AI can find. Seven ways to do it, what each costs, and the order I try them in."
+type: blueprint
+status: tested
+topics: ["retrieval"]
+published: 2026-09-23
+draft: false
+code: src/blueprints/chunking.py
+repos:
+  - repo: docling-project/docling
+    note: "Structure-aware parsing of PDFs and Office files into clean sections and tables."
+  - repo: langchain-ai/langchain
+    note: "Recursive and structure-based text splitters, a practical starting point."
+  - repo: run-llama/llama_index
+    note: "Hierarchical node parsing and auto-merging (parent–child) retrieval."
+  - repo: jina-ai/late-chunking
+    note: "Reference code and evaluation for late chunking."
+  - repo: FlagOpen/FlagEmbedding
+    note: "Open embedding and reranker models (BGE) to pair with any chunker."
+  - repo: explodinggradients/ragas
+    note: "Retrieval and answer metrics for comparing chunking changes."
+changelog:
+  - date: 2026-09-23
+    note: First published.
+---
+
+When a <Term id="rag">RAG</Term> system gives a bad answer, I check the chunks before I touch the prompt. More often than not the passage that answers the question exists, but it was split in half, or buried inside a chunk about three other things, or separated from the heading that said what it was about.
+
+<FieldNote title="In production">
+Chunking failures rarely look like chunking failures. The *Seven Failure Points* paper (Barnett et al., 2024) describes the symptoms instead: the right document ranked below the cut-off, the answer missing from the retrieved context, or an incomplete answer. To find the cause, take the questions your eval set misses, open the chunk that should have matched, and look at where it starts and ends. A table cut in half or a paragraph separated from its heading usually turns up within the first ten misses.
+</FieldNote>
+
+## The trade-off
+
+Each chunk becomes one <Term id="embedding">embedding</Term>. Small chunks match questions precisely but lose context: "the dose was then doubled" means nothing on its own. Large chunks keep context, but their embedding averages several topics together, so they match fewer questions well and cost more tokens every time they're retrieved.
+
+Every strategy below is a different way of getting out of that trade-off.
+
+<Tradeoffs
+  columns={["Retrieval quality", "Low cost", "Simplicity"]}
+  rows={[
+    { name: "Fixed-size + overlap", cells: [1, 3, 3], best: "A baseline to beat" },
+    { name: "Recursive (separator-aware)", cells: [2, 3, 3], best: "Plain prose" },
+    { name: "Structure / layout-aware", cells: [3, 2, 2], best: "Headings, tables, forms, PDFs" },
+    { name: "Semantic breakpoints", cells: [2, 2, 2], best: "Long text that changes topic" },
+    { name: "Parent–child (small-to-big)", cells: [3, 2, 2], best: "Precise match, but answers need context" },
+    { name: "Contextual chunk headers", cells: [3, 1, 2], best: "Chunks that don't stand on their own" },
+    { name: "Late chunking", cells: [3, 2, 1], best: "Meaning depends on earlier sections" },
+  ]}
+  caption="Relative, more dots is better. My judgement, not a benchmark. Your documents may disagree."
+/>
+
+## The order I try them in
+
+<Steps>
+  <Step title="Read twenty real documents first">
+    Headings? Tables? Scans? Long narrative? That hour decides most of what follows.
+  </Step>
+  <Step title="Structure-aware, with recursive splitting inside long sections">
+    Split along the document's own structure, and put the title and section path at the top of every chunk. That last part is a few lines of code and fixes a surprising number of misses.
+  </Step>
+  <Step title="Build the eval set now">
+    Fifty to a hundred real questions, each tagged with the passage that answers it. Without it you're comparing strategies by feel.
+  </Step>
+  <Step title="Parent–child, if answers lack context">
+    If the right chunk comes back but the answer is still weak, retrieve small and hand the model the parent section.
+  </Step>
+  <Step title="Contextual headers or late chunking, if chunks don't stand alone">
+    If the right chunk doesn't come back at all because it only makes sense in context, give it that context before embedding.
+  </Step>
+</Steps>
+
+## Notes on each
+
+**Fixed-size.** Cut every N tokens with 10–20% overlap. It ignores meaning entirely. I only keep it as the baseline.
+
+**Recursive.** Split on the biggest natural boundary that fits (section, paragraph, sentence) and fall back to smaller ones only when needed. Cheap, and it respects the text.
+
+**Structure-aware.** Parse properly first, so tables stay whole and sections stay with their headings. For PDFs and forms this is the biggest single improvement, and the one teams skip because parsing is dull work.
+
+**Semantic breakpoints.** Start a new chunk where the similarity between neighbouring sentences drops. It needs an embedding call per sentence and threshold tuning. One 2024 study found the gains over fixed-size chunks too inconsistent to justify the cost, which matches my sense that where you cut matters less than what context the piece carries.
+
+**Parent–child.** Index small, return big. My usual second step.
+
+**Contextual headers.** Before embedding, prepend a line or two describing where the chunk sits, optionally written by a model. Anthropic's write-up on contextual retrieval reported large drops in retrieval failures, especially combined with <Term id="bm25">BM25</Term> and a <Term id="reranker">reranker</Term>. The cost is one model call per chunk at ingestion.
+
+**Late chunking.** Embed the whole document with a long-context model, then pool token vectors into chunks, so each chunk's vector has seen the rest of the document. No extra model calls, but you need an embedding model that supports it.
+
+<FieldNote title="In production">
+Contextual retrieval has the stronger evidence. Anthropic measured a 35% drop in top-20 retrieval failures from contextual embeddings alone, at about $1 per million document tokens with prompt caching. Late chunking's published gain is smaller, around 1.8 points of nDCG@10 on BEIR with 256-token chunks, but it needs no model calls. Use late chunking when ingestion cost or data policy rules out an LLM pass, and contextual retrieval when better retrieval is worth paying for.
+</FieldNote>
+
+## Starting sizes
+
+These are first guesses to measure against:
+
+- 200–500 tokens for chunks you match on; larger if questions are summary-style.
+- 10–20% overlap only when you split mid-text. None when you split on real boundaries.
+- Parents sized so that *k* of them fit comfortably in the <Term id="context-window">context window</Term> with room for the answer.
+
+<FieldNote title="In production">
+Published evaluations agree on the extremes and disagree on the middle. NVIDIA found the best size varied by dataset (512 tokens for one, 1,024 for two others), with page-level chunks best on average. LlamaIndex found 1,024 best on their test. Chroma found 200-token chunks without overlap more efficient than 400. Very small (128) and very large (2,048) chunks lose almost everywhere. Overlap mostly duplicates tokens: Chroma found removing it improved efficiency, and NVIDIA's small gain from 15% overlap came from a single dataset. Start around 256–512 tokens for lookup questions and 1,024 or a page for analytical ones, and let the eval set decide.
+</FieldNote>
+
+## A sketch
+
+Helpers like `recursive_split` and `hybrid_search` stand in for whatever your stack provides.
+
+```python
+def chunk_document(doc, max_tokens=400):
+    chunks = []
+    for section in doc.sections:                # from a layout-aware parser
+        header = f"{doc.title} > {' > '.join(section.path)}"
+        parent_id = store_parent(section.text)
+        for piece in recursive_split(section.text, max_tokens):
+            chunks.append({
+                "text": f"{header}\n\n{piece}",   # embedded
+                "parent_id": parent_id,           # what the model reads
+                "page": section.page,             # for citations
+            })
+    return chunks
+
+def retrieve(query, k=8):
+    hits = rerank(query, hybrid_search(query, k=k * 3))[:k]
+    return [load_parent(p) for p in dedupe(h["parent_id"] for h in hits)]
+```
+
+## Measuring it
+
+Measure retrieval on its own. If the right passage isn't in the top results, nothing downstream can fix it.
+
+- **Recall@k**: is the answering passage in the top *k*? The number I watch most.
+- **MRR**: how high it appears. Matters when you pass only a few chunks on.
+- **Answer quality**, graded against a rubric, once retrieval looks healthy.
+
+Re-run the whole set on every chunking change. A change that helps one kind of question often quietly hurts another.
+
+## Sources
+
+- Anthropic, *Introducing Contextual Retrieval* (2024)
+- Günther et al., *Late Chunking: Contextual Chunk Embeddings Using Long-Context Embedding Models* (Jina AI, 2024)
+- Qu et al., *Is Semantic Chunking Worth the Computational Cost?* (2024)
+- Barnett et al., *Seven Failure Points When Engineering a Retrieval Augmented Generation System* (2024)
+- NVIDIA, *Finding the Best Chunking Strategy for Accurate AI Responses* (2025)
+- Chroma, *Evaluating Chunking Strategies for Retrieval* (2024)
+- LlamaIndex, *Evaluating the Ideal Chunk Size for a RAG System* (2023)
