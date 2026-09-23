@@ -6,25 +6,37 @@
 --------------------------------------------------------------------------- */
 
 :root {
-  --bg: #fcfcfb;
-  --surface: #f3f3f0;
+  /* Light theme: "warm daylight" — ivory base, sand and mint bands, a vivid
+     tangerine accent and a tangerine → rose → teal signature gradient.
+     Every text colour is >=4.5:1 on every surface (gradient >=3:1, large
+     text only). */
+  --bg: #fbf8f2;
+  --surface: #f5ecdf;       /* warm sand band */
+  --surface-cool: #e9f3ef;  /* mint band */
   --raised: #ffffff;
-  --line: #e3e3de;
-  --line-soft: #ededea;
+  --line: #eadcc8;
+  --line-soft: #f2e8d8;
 
-  --text: #15151a;
-  --muted: #4a4a53;
-  --faint: #65656f;         /* ≥4.5:1 on every light surface, incl. glow */
+  --text: #1b1611;
+  --muted: #4a4138;
+  --faint: #685d50;
 
-  --accent: #9a4e0c;        /* text-safe on light */
-  --accent-vivid: #e8811f;  /* decorative marks, rules, dots */
-  --teal: #0c7d6e;
-  --flag: #c33f28;
+  --accent: #b13c08;        /* text-safe */
+  --accent-vivid: #f97316;  /* decorative marks, rules, dots */
+  --teal: #0d6b63;
+  --violet: #8b5cf6;
+  --flag: #c7361f;
 
-  /* canvas */
-  --glow-a: 0.11;
-  --glow-b: 0.085;
-  --sim-bg: #f7f7f6;
+  --g1: #cc4a0c;            /* signature gradient */
+  --g2: #db2777;
+  --g3: #0d6b63;
+  --card-glow: 0 30px 60px -28px rgba(234, 88, 12, 0.35);
+
+  /* aurora + canvas */
+  --glow-a: 0.34;
+  --glow-b: 0.26;
+  --glow-c: 0.2;
+  --sim-bg: #fbf8f2;
   --sim-additive: 0;
   --sim-trail: 0.92;   /* near-full clear: trails smear on a light ground */
   --sim-floor: 0.8;
@@ -34,6 +46,13 @@
 }
 
 :root[data-theme="dark"] {
+  --surface-cool: #0b1112;
+  --violet: #a78bfa;
+  --g1: #ff9f43;
+  --g2: #f472b6;
+  --g3: #68d6c6;
+  --card-glow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+  --glow-c: 0.1;
   --bg: #08080a;
   --surface: #0e0e11;
   --raised: #16161b;
@@ -62,6 +81,13 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    --surface-cool: #0b1112;
+    --violet: #a78bfa;
+    --g1: #ff9f43;
+    --g2: #f472b6;
+    --g3: #68d6c6;
+    --card-glow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+    --glow-c: 0.1;
     --bg: #08080a;
     --surface: #0e0e11;
     --raised: #16161b;
@@ -92,6 +118,8 @@
 @theme inline {
   --color-ink: var(--bg);
   --color-surface: var(--surface);
+  --color-surface-cool: var(--surface-cool);
+  --color-violet: var(--violet);
   --color-raised: var(--raised);
   --color-line: var(--line);
   --color-line-soft: var(--line-soft);
@@ -141,6 +169,28 @@ body {
   --sh-string: var(--accent);
   --sh-keyword: var(--flag);
   --sh-comment: var(--faint);
+}
+
+/* Signature gradient text: tangerine → rose → teal. Large text only. */
+.text-gradient {
+  background-image: linear-gradient(100deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.bg-gradient-brand {
+  background-image: linear-gradient(100deg, var(--g1), var(--g2) 55%, var(--g3));
+}
+
+/* Aurora: three soft discs drifting slowly behind page heads. */
+@keyframes aurora-a { 0%,100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(6%, 4%) scale(1.08); } }
+@keyframes aurora-b { 0%,100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-5%, 6%) scale(1.12); } }
+@keyframes aurora-c { 0%,100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(4%, -5%) scale(0.94); } }
+.aurora-a { animation: aurora-a 22s ease-in-out infinite; }
+.aurora-b { animation: aurora-b 26s ease-in-out infinite; }
+.aurora-c { animation: aurora-c 30s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .aurora-a, .aurora-b, .aurora-c { animation: none; }
 }
 
 /* Soft warm light behind page heads. Two blurred discs, theme-aware. */

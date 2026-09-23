@@ -80,7 +80,7 @@ export default async function BlueprintPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <header className="relative overflow-hidden px-6 pb-12 pt-36 sm:px-10 md:pt-44">
-        <Glow />
+        <Glow soft />
         <div className="relative mx-auto max-w-6xl">
           {b.draft && (
             <p className="mb-8 inline-flex rounded-full border border-flag/40 bg-flag/10 px-4 py-2 text-sm text-flag">
@@ -89,11 +89,11 @@ export default async function BlueprintPage({ params }: Props) {
           )}
           <Reveal fade={false}>
             <nav aria-label="Breadcrumb" className="font-mono text-[11px] uppercase tracking-[0.2em]">
-              <Link href="/" className="text-faint transition-colors hover:text-text">Home</Link>
+              <Link href="/" className="text-muted transition-colors hover:text-text">Home</Link>
               <span aria-hidden className="mx-3 text-line">/</span>
-              <Link href="/blueprints" className="text-faint transition-colors hover:text-text">Blueprints</Link>
+              <Link href="/blueprints" className="text-muted transition-colors hover:text-text">Blueprints</Link>
               <span aria-hidden className="mx-3 text-line">/</span>
-              <span className="text-accent">{TYPE_LABEL[b.type]}</span>
+              <span aria-current="page" className="font-medium text-text">{TYPE_LABEL[b.type]}</span>
             </nav>
           </Reveal>
           <Reveal fade={false} delay={0.06}>
@@ -102,7 +102,7 @@ export default async function BlueprintPage({ params }: Props) {
             </h1>
           </Reveal>
           <Reveal fade={false} delay={0.12}>
-            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-faint">
+            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-muted">
               <StatusBadge status={b.status} />
               <span>{b.readingMinutes} min read</span>
               <span aria-hidden>·</span>

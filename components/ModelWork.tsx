@@ -25,7 +25,7 @@ export const ModelWork = () => (
       {MODEL.tracks.map((tr, i) => (
         <Reveal key={tr.n} delay={0.04 * i} className="h-full">
           <article className="flex h-full flex-col rounded-3xl border border-line bg-raised p-8 lg:p-10">
-            <span className="font-serif text-3xl italic leading-none text-accent/80">{tr.n}</span>
+            <span className="text-gradient w-fit pb-1 pr-2 font-serif text-3xl italic leading-none">{tr.n}</span>
             <h3 className="mt-6 text-2xl font-medium tracking-tight text-text">{tr.title}</h3>
             <p className="mt-3 font-light leading-relaxed text-muted">{tr.lede}</p>
             <ul className="mt-8 space-y-3 border-t border-line pt-6">

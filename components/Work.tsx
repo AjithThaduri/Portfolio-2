@@ -10,7 +10,7 @@ const FlagshipCards = () => (
       <Reveal key={p.slug} delay={0.05 * (i % 2)} className="h-full">
         <Link
           href={`/work/${p.slug}`}
-          className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-raised p-7 transition-all duration-500 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.35)] sm:p-9"
+          className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-raised p-7 transition-all duration-500 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[var(--card-glow)] sm:p-9"
         >
           {/* warm light that follows the card into hover */}
           <span
@@ -19,7 +19,7 @@ const FlagshipCards = () => (
             style={{ background: "var(--accent-vivid)" }}
           />
           <div className="relative flex items-start justify-between gap-6">
-            <span className="font-serif text-5xl italic leading-none text-accent/80">
+            <span className="text-gradient pb-1 pr-2 font-serif text-5xl italic leading-none">
               {p.n}
             </span>
             <span className="max-w-[14rem] text-right font-mono text-[10px] uppercase leading-relaxed tracking-[0.16em] text-faint">

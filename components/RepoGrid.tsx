@@ -18,7 +18,7 @@ export const RepoGrid = ({ repos, featured = false }: { repos: RepoCard[]; featu
             {/* The whole card links to the repo (stretched link); the credit
                 link sits above it so both stay clickable without nesting. */}
             <article
-              className={`group relative flex h-full flex-col rounded-3xl border border-line bg-raised transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/30 duration-500 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.35)] ${
+              className={`group relative flex h-full flex-col rounded-3xl border border-line bg-raised transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/30 duration-500 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[var(--card-glow)] ${
                 featured ? "p-8" : "p-6"
               }`}
             >

@@ -5,7 +5,7 @@ import { Reveal } from "./Reveal";
 /** Small mono label with a short accent rule — used above every heading. */
 export const Eyebrow = ({ children, as: Tag = "p" }: { children: ReactNode; as?: "p" | "h2" }) => (
   <Tag className="flex items-center gap-3 font-mono text-[11px] font-normal uppercase tracking-[0.2em] text-accent">
-    <span aria-hidden className="h-px w-6 bg-accent-vivid" />
+    <span aria-hidden className="bg-gradient-brand h-px w-6" />
     {children}
   </Tag>
 );
@@ -43,13 +43,13 @@ export const Section = ({
 }: {
   id?: string;
   children: ReactNode;
-  tone?: "ink" | "surface";
+  tone?: "ink" | "surface" | "cool";
   className?: string;
 }) => (
   <section
     id={id}
     className={`relative scroll-mt-20 overflow-hidden px-6 py-24 sm:px-10 md:py-36 ${
-      tone === "surface" ? "bg-surface" : "bg-ink"
+      tone === "surface" ? "bg-surface" : tone === "cool" ? "bg-surface-cool" : "bg-ink"
     } ${className}`}
   >
     <div className="relative mx-auto max-w-6xl">{children}</div>
@@ -69,11 +69,11 @@ export const PageHeader = ({
   children?: ReactNode;
 }) => (
   <header className="relative overflow-hidden px-6 pb-16 pt-36 sm:px-10 md:pb-24 md:pt-44">
-    <Glow />
+    <Glow soft />
     <div className="relative mx-auto max-w-6xl">
       <Reveal fade={false}>
         <nav aria-label="Breadcrumb" className="font-mono text-[11px] uppercase tracking-[0.2em]">
-          <Link href="/" className="text-faint transition-colors hover:text-text">
+          <Link href="/" className="text-muted transition-colors hover:text-text">
             Home
           </Link>
           <span aria-hidden className="mx-3 text-line">/</span>
@@ -97,25 +97,33 @@ export const PageHeader = ({
   </header>
 );
 
-/** Two soft discs of warm and cool light. Purely decorative. */
-export const Glow = () => (
-  <>
-    <div
-      aria-hidden
-      className="glow -left-40 -top-40 h-[34rem] w-[34rem]"
-      style={{ background: "var(--accent-vivid)", opacity: "var(--glow-a)" }}
-    />
-    <div
-      aria-hidden
-      className="glow -right-48 top-10 h-[28rem] w-[28rem]"
-      style={{ background: "var(--teal)", opacity: "var(--glow-b)" }}
-    />
-  </>
-);
+/** Aurora: three soft discs — tangerine, rose, teal — drifting slowly.
+    Strong enough to give the light theme warmth; purely decorative. */
+export const Glow = ({ soft = false }: { soft?: boolean }) => {
+  // Inner-page headers carry small text (breadcrumbs, meta) right on top of
+  // the glow, so they get a softer aurora kept away from the text.
+  const k = soft ? 0.55 : 1;
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div
+        className={`glow aurora-a h-[36rem] w-[36rem] ${soft ? "-left-72 -top-72" : "-left-40 -top-48"}`}
+        style={{ background: "var(--accent-vivid)", opacity: `calc(var(--glow-a) * ${k})` }}
+      />
+      <div
+        className="glow aurora-b left-[35%] -top-64 h-[30rem] w-[30rem]"
+        style={{ background: "var(--g2)", opacity: `calc(var(--glow-c) * ${k})` }}
+      />
+      <div
+        className="glow aurora-c -right-48 top-10 h-[32rem] w-[32rem]"
+        style={{ background: "var(--teal)", opacity: `calc(var(--glow-b) * ${k})` }}
+      />
+    </div>
+  );
+};
 
 /** Serif italic accent for a word or phrase inside a heading. */
 export const Accent = ({ children }: { children: ReactNode }) => (
-  <em className="font-serif font-normal italic tracking-normal text-accent">{children}</em>
+  <em className="text-gradient inline-block pb-2 pr-2 font-serif font-normal italic tracking-normal">{children}</em>
 );
 
 const btnBase =

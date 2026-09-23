@@ -22,7 +22,7 @@ export const StatusBadge = ({ status }: { status: BlueprintMeta["status"] }) => 
 export const BlueprintCard = ({ b }: { b: BlueprintMeta }) => (
   <Link
     href={`/blueprints/${b.slug}`}
-    className="group relative flex h-full flex-col rounded-3xl border border-line bg-raised p-7 transition-all duration-500 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.35)]"
+    className="group relative flex h-full flex-col rounded-3xl border border-line bg-raised p-7 transition-all duration-500 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[var(--card-glow)]"
   >
     <div className="flex flex-wrap items-center gap-2">
       <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">

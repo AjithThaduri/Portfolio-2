@@ -55,19 +55,19 @@ export default async function CaseStudy({ params }: Props) {
       <ReadingProgress />
 
       <header className="relative overflow-hidden px-6 pb-14 pt-36 sm:px-10 md:pt-44">
-        <Glow />
+        <Glow soft />
         <div className="relative mx-auto max-w-6xl">
           <Reveal fade={false}>
             <nav aria-label="Breadcrumb" className="font-mono text-[11px] uppercase tracking-[0.2em]">
-              <Link href="/" className="text-faint transition-colors hover:text-text">
+              <Link href="/" className="text-muted transition-colors hover:text-text">
                 Home
               </Link>
               <span aria-hidden className="mx-3 text-line">/</span>
-              <Link href="/#work" className="text-faint transition-colors hover:text-text">
+              <Link href="/#work" className="text-muted transition-colors hover:text-text">
                 Work
               </Link>
               <span aria-hidden className="mx-3 text-line">/</span>
-              <span className="text-accent">{p.n}</span>
+              <span aria-current="page" className="font-medium text-text">{p.n}</span>
             </nav>
           </Reveal>
 
@@ -141,7 +141,7 @@ export default async function CaseStudy({ params }: Props) {
                 {p.decisions.map((d, i) => (
                   <li key={d.head} className="h-full">
                     <Reveal delay={0.04 * (i % 2)} className="flex h-full flex-col rounded-3xl border border-line bg-raised p-7">
-                      <span className="font-serif text-3xl italic leading-none text-accent/80">
+                      <span className="text-gradient w-fit pb-1 pr-2 font-serif text-3xl italic leading-none">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <h3 className="mt-6 text-lg font-medium tracking-tight text-text">{d.head}</h3>
