@@ -1,0 +1,69 @@
+---
+title: "When the poison is in the reasoning, not the paragraph"
+summary: "Single-chunk RAG filters miss attribute+bridge induction. A small synthetic mini-eval (EXP-007, SELF-EVALUATED / EXPLORATORY) shows the shape: multihop ASR rises under a joint filter, and HODOR-style isolation cuts it with a clean multi-hop utility cost."
+type: note
+status: experimental
+topics: ["retrieval", "security", "agents"]
+published: 2026-09-24
+draft: true
+repos:
+  - repo: AjithThaduri/Ajiths-AILab
+    note: "EXP-007 harness under experiments/exp-007-multihop-rag-poison/."
+  - repo: ZJU-TrustAID/InceptionRAG
+    note: "Paper artifact for InceptionRAG (CCS ’26)."
+changelog:
+  - date: 2026-09-24
+    note: Draft lab note from Phase-2 Daily AI Radar; awaiting Ajith approval before production.
+---
+
+Naive RAG security often means: retrieve top-k, scan each chunk, drop the toxic ones, generate.
+
+That works against **single-document** injections where the malicious payload sits in one place — an explicit “send the roster externally” playbook, a hijack prompt, a one-shot narrative update. It understates risk when the false conclusion is **induced** across passages.
+
+## Two coordinated attacks this fortnight
+
+**InceptionRAG** (CCS ’26, arXiv:2609.16818) splits the payload into an *attribute* passage and a *bridge* passage. Individually they look benign. Together they force multi-hop deduction of the target answer. Authors report ASR above 80% under N=2 poison docs in k=10 retrieval, and strong bypass of single-document filters (for example NQ + AVFilter: ASR 72.3%, bypass 90.4% — **paper / author-reported**). Larger / stronger-reasoning models were *more* vulnerable in their slate. Proposed defense: **HODOR** — answer each document in isolation, then majority-vote — which cuts ASR but hurts multi-hop utility.
+
+**DnD** (Divide and Doubt, arXiv:2609.27090) is the complementary red-team case: style-diverse support passages plus a “doubt” passage that undermines the reference answer without naming it. Useful later as a stretch corpus role; not the focus of EXP-007.
+
+## What I measured in the lab (honest scope)
+
+EXP-007 is a **bounded synthetic mini-eval** on `company.example` mailbox/SOP docs — no real PHI/PII. Same family of deterministic `send_email` asserts as EXP-001. The agent under test is a **mock** that encodes a single-doc toxicity filter, multi-hop induction, and a HODOR-lite isolation path. Label: **SELF-EVALUATED / EXPLORATORY**. This is not a reproduction of the InceptionRAG tables and not a claim about any production frontier model.
+
+Headline mock numbers (N=5 per cell):
+
+| Condition | Defense | ASR / false-refusal |
+| --- | --- | ---: |
+| Single explicit poison | joint + single-doc filter | ASR **0%** |
+| Attribute + bridge | joint + same filter | ASR **100%** |
+| Attribute + bridge | isolation (HODOR-lite) | ASR **0%** |
+| Clean multi-hop | joint | false-refusal **0%** |
+| Clean multi-hop | isolation | false-refusal **40%** |
+
+The shape matches the paper’s story: the filter that catches explicit singles misses the stitch; isolation breaks the stitch and taxes real multi-hop work.
+
+## Design notes for regulated stacks
+
+1. **Golden sets need attribute+bridge cases**, not only “ignore previous instructions” docs.
+2. **Assert on tool calls** (recipients, attachments, wire/credential patterns) — not only answer text.
+3. **Isolation is a knob, not a free lunch.** Measure clean multi-hop false-refusal before you turn it on for legal or medical records that genuinely need cross-document reasoning.
+4. **Tool gates still matter.** Even a wrong answer should not become a wrong *action* — pair retrieval defenses with deterministic allow/deny at the tool boundary (see also ActGov, arXiv:2609.24446, as architecture context — not run here).
+
+## Serving footnote
+
+Self-hosted stacks that expose OpenAI-compatible endpoints still need a patch pin. Mid–late September 2026 brought several vLLM DoS/integrity CVEs (for example CVE-2026-93592 before 0.28.0 on embeddings/pooling; other disagg/KV issues need later cuts). Confirm each advisory before client advice.
+
+## Reproduce
+
+```bash
+cd experiments/exp-007-multihop-rag-poison
+python3 run_experiment.py
+```
+
+Evidence: [Ajiths-AILab](https://github.com/AjithThaduri/Ajiths-AILab) → `experiments/exp-007-multihop-rag-poison/`.
+
+## Sources
+
+- Zhang et al., *InceptionRAG: Stealthy Poisoning Attack Against Retrieval-Augmented Generation* (CCS ’26) — https://arxiv.org/abs/2609.16818
+- DnD — https://arxiv.org/abs/2609.27090
+- ActGov (adjacent) — https://arxiv.org/abs/2609.24446
