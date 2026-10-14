@@ -233,6 +233,50 @@ body {
   .page-enter { animation: none; }
 }
 
+/* Hero stage: an evening scene taken from the photo itself — deep evergreen,
+   warm skin-light, the red of the shirt. It is the same in both themes,
+   the way a photograph is. */
+.hero-stage {
+  --stage-base: #0a120d;
+  --stage-ink: #f4efe6;
+  --stage-ink-2: rgba(244, 239, 230, 0.76);
+  --stage-ink-3: rgba(244, 239, 230, 0.52);
+  --stage-amber: #f2b27c;
+  --stage-leaf: #4f8a5b;
+  --stage-rose: #e2566e;
+  --stage-line: rgba(244, 239, 230, 0.14);
+  --stage-line-strong: rgba(244, 239, 230, 0.34);
+  background: var(--stage-base);
+  color: var(--stage-ink);
+}
+/* the nav, while it floats over the stage, borrows the stage's palette */
+.on-stage {
+  --text: #f4efe6;
+  --muted: rgba(244, 239, 230, 0.72);
+  --faint: rgba(244, 239, 230, 0.55);
+  --ink: #0a120d;
+  --bg: #0a120d;
+  --surface: rgba(244, 239, 230, 0.1);
+  --raised: rgba(244, 239, 230, 0.06);
+  --line: rgba(244, 239, 230, 0.2);
+  --accent: #f2b27c;
+}
+/* warm light behind the head, deep at the edges, darker where words sit */
+.stage-light {
+  background:
+    radial-gradient(34% 44% at 29% 40%, rgba(242, 178, 124, 0.26), transparent 72%),
+    linear-gradient(90deg, rgba(10, 18, 13, 0.1) 0%, rgba(10, 18, 13, 0.18) 42%, rgba(10, 18, 13, 0.78) 62%, rgba(10, 18, 13, 0.9) 100%),
+    linear-gradient(0deg, rgba(10, 18, 13, 0.7) 0%, transparent 30%),
+    linear-gradient(180deg, rgba(10, 18, 13, 0.55) 0%, transparent 24%);
+}
+@media (max-width: 1023px) {
+  .stage-light {
+    background:
+      radial-gradient(70% 26% at 50% 24%, rgba(242, 178, 124, 0.22), transparent 72%),
+      linear-gradient(180deg, rgba(10, 18, 13, 0.5) 0%, transparent 16%, transparent 34%, rgba(10, 18, 13, 0.82) 54%, rgba(10, 18, 13, 0.92) 100%);
+  }
+}
+
 /* Portrait: the cut-out stands on a backdrop the theme paints, so the photo
    always sits in the site's own light rather than the studio's. */
 .portrait-backdrop {

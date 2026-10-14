@@ -39,7 +39,11 @@ export const Nav = () => {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6">
+      <header
+        className={`fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 ${
+          pathname === "/" && !scrolled && !open ? "on-stage" : ""
+        }`}
+      >
         <div
           className={`mx-auto flex max-w-6xl items-center justify-between rounded-full border py-2 pl-5 pr-2 transition-all duration-500 ${
             scrolled || open
