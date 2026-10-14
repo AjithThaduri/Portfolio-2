@@ -34,7 +34,7 @@
 export const SHOW_DRAFTS = true;
 
 /** How many "Also built" cards show before the "Show more" button. */
-export const MORE_WORK_INITIAL = 3;
+export const MORE_WORK_INITIAL = 4;
 
 export const SITE = {
   // Must match the host that actually serves (the apex 307s to www).

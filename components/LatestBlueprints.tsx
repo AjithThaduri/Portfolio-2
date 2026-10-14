@@ -1,33 +1,52 @@
 import Link from "next/link";
 import { BLUEPRINTS_INTRO } from "@/lib/content";
-import { getBlueprintMetas } from "@/lib/blueprints";
-import { BlueprintCard } from "./blueprint/BlueprintCard";
+import { formatDate, getBlueprintMetas, TYPE_LABEL } from "@/lib/blueprints";
+import { StatusBadge } from "./blueprint/BlueprintCard";
 import { Reveal } from "./Reveal";
 import { Section, SectionHead } from "./Section";
 
+/* The latest writing as a dated list — the one place on the site where
+   dates belong. */
 export const LatestBlueprints = () => {
   const items = getBlueprintMetas().slice(0, 3);
   if (!items.length) return null;
   return (
     <Section id="blueprints">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <SectionHead eyebrow={BLUEPRINTS_INTRO.title} title={BLUEPRINTS_INTRO.headline} lede={BLUEPRINTS_INTRO.lede} className="!mb-0" />
-        <Reveal>
-          <Link
-            href="/blueprints"
-            className="group inline-flex items-center gap-2 rounded-full border border-line px-5 py-2.5 text-sm font-medium text-text transition-colors hover:border-text"
-          >
-            All blueprints
-            <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
-          </Link>
-        </Reveal>
-      </div>
-      <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {items.map((b, i) => (
-          <Reveal key={b.slug} delay={0.05 * i} className="h-full">
-            <BlueprintCard b={b} />
-          </Reveal>
+      <SectionHead rail eyebrow={BLUEPRINTS_INTRO.title} title={BLUEPRINTS_INTRO.headline} lede={BLUEPRINTS_INTRO.lede} />
+      <ul className="border-t border-line">
+        {items.map((b) => (
+          <li key={b.slug} className="border-b border-line">
+            <Reveal>
+              <Link
+                href={`/blueprints/${b.slug}`}
+                className="group grid gap-3 py-8 lg:grid-cols-12 lg:gap-8 lg:py-10"
+              >
+                <div className="flex items-baseline gap-3 text-sm lg:col-span-3 lg:block lg:space-y-1 lg:pt-1">
+                  <p className="text-muted">{formatDate(b.updated ?? b.published)}</p>
+                  <p className="font-serif text-base italic text-faint">{TYPE_LABEL[b.type]}</p>
+                </div>
+                <div className="lg:col-span-6">
+                  <h3 className="text-balance text-xl font-medium leading-snug tracking-tight text-text transition-colors duration-300 group-hover:text-accent sm:text-[1.4rem]">
+                    {b.title}
+                  </h3>
+                  <p className="mt-3 max-w-[60ch] text-pretty font-light leading-relaxed text-muted">{b.summary}</p>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-faint lg:col-span-3 lg:flex-col lg:items-end lg:gap-2 lg:pt-1">
+                  <StatusBadge status={b.status} />
+                  <span>{b.readingMinutes} min read</span>
+                </div>
+              </Link>
+            </Reveal>
+          </li>
         ))}
+      </ul>
+      <div className="mt-14 lg:grid lg:grid-cols-12 lg:gap-8">
+        <Link
+          href="/blueprints"
+          className="text-sm font-medium text-text underline decoration-line underline-offset-[6px] transition-colors hover:decoration-accent lg:col-span-9 lg:col-start-4"
+        >
+          All blueprints
+        </Link>
       </div>
     </Section>
   );

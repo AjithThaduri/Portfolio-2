@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { HERO, PHOTOS } from "@/lib/content";
-import { Button, Glow } from "./Section";
+import { Button } from "./Section";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -46,14 +46,12 @@ export const Hero = () => {
       id="top"
       className="relative overflow-hidden px-6 pb-16 pt-28 sm:px-10 md:pt-32 lg:flex lg:min-h-[100svh] lg:flex-col lg:justify-center lg:pb-16 lg:pt-28"
     >
-      <div aria-hidden className="hero-grid pointer-events-none absolute inset-0" />
-      <Glow />
-
       <div className="relative mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)] lg:gap-16 xl:gap-20">
         <motion.div
           initial={{ scale: 1.015 }}
           animate={{ scale: 1 }}
           transition={{ duration: 1.4, ease: EASE }}
+          className="order-last lg:order-none"
         >
           <PhotoPanel name={intro.name} line={intro.line} time={time} />
         </motion.div>
@@ -65,7 +63,7 @@ export const Hero = () => {
               </motion.span>
               <motion.span
                 {...rise(0.22)}
-                className="text-gradient relative mt-1 inline-block pb-4 pr-4 font-serif text-[1.04em] font-normal italic leading-[1.04] tracking-[-0.03em]"
+                className="mt-1 block font-serif text-[1.06em] font-normal italic leading-[1.04] tracking-[-0.025em]"
               >
                 {last.replace(/\.$/, "")}
                 <span
@@ -79,31 +77,6 @@ export const Hero = () => {
                 >
                   .
                 </span>
-                {/* hand-drawn underline, drawn in once */}
-                <svg
-                  aria-hidden
-                  viewBox="0 0 300 14"
-                  preserveAspectRatio="none"
-                  className="pointer-events-none absolute bottom-0 left-0 h-3.5 w-[94%]"
-                >
-                  <defs>
-                    <linearGradient id="hero-underline" x1="0" x2="1" y1="0" y2="0">
-                      <stop offset="0%" style={{ stopColor: "var(--g1)" }} />
-                      <stop offset="55%" style={{ stopColor: "var(--g2)" }} />
-                      <stop offset="100%" style={{ stopColor: "var(--g3)" }} />
-                    </linearGradient>
-                  </defs>
-                  <motion.path
-                    d="M2 9 C 60 3, 120 3, 180 7 S 270 11, 298 4"
-                    fill="none"
-                    stroke="url(#hero-underline)"
-                    strokeWidth={2.4}
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 0.85 }}
-                    transition={{ duration: 1.1, delay: 0.9, ease: EASE }}
-                  />
-                </svg>
               </motion.span>
             </h1>
 
@@ -120,7 +93,7 @@ export const Hero = () => {
             </Button>
           </motion.div>
           <motion.p {...rise(0.54)} className="mt-12 flex items-baseline gap-5 border-t border-line pt-7">
-            <span className="text-gradient pb-1 text-5xl font-light leading-none tracking-[-0.04em]">
+            <span className="text-5xl font-light leading-none tracking-[-0.04em] text-text">
               {HERO.proof.value}
             </span>
             <span className="max-w-[19rem] text-pretty leading-snug text-muted">{HERO.proof.line}</span>
