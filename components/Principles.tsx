@@ -7,7 +7,7 @@ const legendColours = ["var(--accent-vivid)", "var(--flag)", "var(--teal)"];
 
 export const Principles = () => (
   <Section id="approach" className="border-t border-line">
-    <SectionHead eyebrow={PRINCIPLES.title} title={PRINCIPLES.headline} lede={PRINCIPLES.lede} />
+    <SectionHead rail eyebrow={PRINCIPLES.title} title={PRINCIPLES.headline} lede={PRINCIPLES.lede} />
 
     {/* The live illustration: messy input, one checkpoint, structured output. */}
     <Reveal>
@@ -18,7 +18,7 @@ export const Principles = () => (
             {PRINCIPLES.figure.legend.map((l, i) => (
               <li
                 key={l}
-                className="inline-flex items-center gap-2 rounded-full border border-line bg-ink/80 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted backdrop-blur-md"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-ink/80 px-3 py-1.5 text-xs text-muted backdrop-blur-md"
               >
                 <span
                   aria-hidden
@@ -40,8 +40,7 @@ export const Principles = () => (
       {PRINCIPLES.items.map((p, i) => (
         <Reveal key={p.n} delay={0.06 * i}>
           <article className="border-t border-line pt-6">
-            <span className="font-mono text-[11px] tracking-[0.2em] text-accent">{p.n}</span>
-            <h3 className="mt-4 text-lg font-medium tracking-tight text-text">{p.title}</h3>
+            <h3 className="text-lg font-medium tracking-tight text-text">{p.title}</h3>
             <p className="mt-3 text-[0.95rem] font-light leading-relaxed text-muted">{p.body}</p>
           </article>
         </Reveal>

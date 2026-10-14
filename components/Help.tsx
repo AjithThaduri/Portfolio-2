@@ -3,23 +3,20 @@ import { HELP } from "@/lib/content";
 import { Reveal } from "./Reveal";
 import { Section, SectionHead } from "./Section";
 
+const textLink =
+  "font-medium text-text underline decoration-line underline-offset-[6px] transition-colors hover:decoration-accent";
+
 export const Help = () => (
   <Section id="help" tone="cool">
-    <SectionHead eyebrow={HELP.title} title={HELP.lede} />
+    <SectionHead rail eyebrow={HELP.title} title={HELP.lede} />
 
-    <div className="grid gap-5 lg:grid-cols-3">
+    <div className="grid gap-x-10 gap-y-14 lg:grid-cols-3">
       {HELP.items.map((h, i) => (
         <Reveal key={h.title} delay={0.06 * i} className="h-full">
-          <article className="flex h-full flex-col rounded-3xl border border-line bg-raised p-8">
-            <span
-              aria-hidden
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-cool font-mono text-xs text-accent ring-1 ring-line"
-            >
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <h3 className="mt-8 text-xl font-medium tracking-tight text-text">{h.title}</h3>
-            <p className="mt-3 font-light leading-relaxed text-muted">{h.body}</p>
-            <ul className="mt-8 space-y-3 border-t border-line pt-6">
+          <article className="flex h-full flex-col border-t border-line pt-7">
+            <h3 className="text-xl font-medium tracking-tight text-text">{h.title}</h3>
+            <p className="mt-3 text-pretty font-light leading-relaxed text-muted">{h.body}</p>
+            <ul className="mt-7 space-y-2.5">
               {h.points.map((pt) => (
                 <li key={pt} className="flex gap-3 text-sm font-light leading-relaxed text-muted">
                   <span aria-hidden className="mt-[0.6rem] h-px w-3 shrink-0 bg-accent-vivid" />
@@ -33,29 +30,18 @@ export const Help = () => (
     </div>
 
     <Reveal>
-      <Link
-        href="/teaching"
-        className="group mt-5 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-dashed border-line px-8 py-6 transition-colors hover:border-accent/50"
-      >
-        <span className="font-light text-muted">{HELP.teachingNote.text}</span>
-        <span className="inline-flex items-center gap-2 text-sm font-medium text-text transition-colors group-hover:text-accent">
-          {HELP.teachingNote.link}
-          <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">
-            →
-          </span>
-        </span>
-      </Link>
-    </Reveal>
-
-    <Reveal>
-      <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm">
-        <Link href="/work-with-me" className="group inline-flex items-center gap-2 font-medium text-text hover:text-accent">
+      <div className="mt-16 flex flex-col gap-4 border-t border-line pt-8 text-sm sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-10">
+        <p className="font-light text-muted">
+          {HELP.teachingNote.text}{" "}
+          <Link href="/teaching" className={textLink}>
+            {HELP.teachingNote.link}
+          </Link>
+        </p>
+        <Link href="/work-with-me" className={`${textLink} sm:ml-auto`}>
           How a project with me works
-          <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
         </Link>
-        <Link href="/work#capabilities" className="group inline-flex items-center gap-2 text-muted hover:text-text">
+        <Link href="/work#capabilities" className={textLink}>
           Browse by capability
-          <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
         </Link>
       </div>
     </Reveal>
