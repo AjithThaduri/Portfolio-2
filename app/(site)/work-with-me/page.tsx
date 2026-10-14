@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { ENGAGE } from "@/lib/content";
 import { ProjectBrief } from "@/components/ProjectBrief";
 import { Reveal } from "@/components/Reveal";
@@ -62,6 +63,16 @@ export default function WorkWithMe() {
           </div>
           <div id="brief" className="scroll-mt-28">
             <SectionHead eyebrow={ENGAGE.brief.title} title="A few lines is enough." lede={ENGAGE.brief.lede} className="!mb-10" />
+            <div className="mb-5 flex items-center gap-4">
+              <Image
+                src="/img/portrait-square.jpg"
+                alt=""
+                width={48}
+                height={48}
+                className="h-12 w-12 shrink-0 rounded-full border border-line"
+              />
+              <p className="text-sm leading-relaxed text-muted">{ENGAGE.brief.note}</p>
+            </div>
             <ProjectBrief />
           </div>
         </div>

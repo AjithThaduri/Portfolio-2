@@ -776,6 +776,8 @@ export const ENGAGE = {
   brief: {
     title: "Tell me about your project",
     lede: "Fill this in and it'll open as an email to me — nothing is stored on this site.",
+    /* shown with my photo beside the form */
+    note: "It comes straight to my inbox. I read every brief myself.",
     types: ["Architecture review", "Build", "Security test", "Training", "Something else"],
   },
 };
@@ -790,6 +792,8 @@ export const BLUEPRINTS_INTRO = {
     note: "A shorter opinion or lesson learned.",
   },
   license: "Text and diagrams are CC BY 4.0 — use them, adapt them, credit the source.",
+  /* byline on every article, with my photo */
+  author: "Ajith Thaduri",
 };
 
 /* Public code. "mine" are repos I wrote. "rely" credits other people's

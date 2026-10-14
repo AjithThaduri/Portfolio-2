@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -11,7 +12,7 @@ import {
   CODE_REPO,
   TYPE_LABEL,
 } from "@/lib/blueprints";
-import { CAPABILITIES, FLAGSHIP, SITE } from "@/lib/content";
+import { BLUEPRINTS_INTRO, CAPABILITIES, FLAGSHIP, SITE } from "@/lib/content";
 import { BlueprintCard, StatusBadge } from "@/components/blueprint/BlueprintCard";
 import { CopyMarkdown } from "@/components/blueprint/CopyMarkdown";
 import { RepoList } from "@/components/blueprint/RepoList";
@@ -103,6 +104,20 @@ export default async function BlueprintPage({ params }: Props) {
           </Reveal>
           <Reveal fade={false} delay={0.12}>
             <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-muted">
+              <Link
+                href="/about"
+                rel="author"
+                className="inline-flex items-center gap-2.5 font-medium text-text transition-colors hover:text-accent"
+              >
+                <Image
+                  src="/img/portrait-square.jpg"
+                  alt=""
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 rounded-full border border-line"
+                />
+                {BLUEPRINTS_INTRO.author}
+              </Link>
               <StatusBadge status={b.status} />
               <span>{b.readingMinutes} min read</span>
               <span aria-hidden>·</span>

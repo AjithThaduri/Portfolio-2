@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { getAllBlueprints, getBlueprint, STATUS_LABEL, TYPE_LABEL } from "@/lib/blueprints";
 
@@ -12,6 +14,8 @@ export function generateStaticParams() {
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const b = getBlueprint(slug);
+  const photo = await readFile(join(process.cwd(), "public/img/portrait-square.jpg"));
+  const src = `data:image/jpeg;base64,${photo.toString("base64")}`;
   return new ImageResponse(
     (
       <div
@@ -39,6 +43,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           style={{
             display: "flex",
             justifyContent: "space-between",
+            alignItems: "center",
             borderTop: "1px solid #212127",
             paddingTop: 28,
             color: "#71727c",
@@ -46,9 +51,12 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           }}
         >
           <span>Open architecture · CC BY 4.0</span>
-          <div style={{ display: "flex", color: "#eceef1" }}>
-            <span>Ajith</span>
-            <span style={{ color: "#ff9f43" }}>Thaduri</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, color: "#eceef1" }}>
+            <img src={src} alt="" width={56} height={56} style={{ borderRadius: 28 }} />
+            <div style={{ display: "flex" }}>
+              <span>Ajith</span>
+              <span style={{ color: "#ff9f43" }}>Thaduri</span>
+            </div>
           </div>
         </div>
       </div>

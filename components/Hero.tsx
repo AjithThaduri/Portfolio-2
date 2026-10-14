@@ -220,16 +220,23 @@ export const Hero = () => {
 };
 
 /* The portrait sits on two slow orbits, with three short, true notes about
-   the work drifting around it. The card leans a few degrees towards the
-   pointer — enough to feel alive, not enough to become the point. */
+   the work drifting around it. The photo is a cut-out standing in an arch
+   whose backdrop the theme paints; on pointer move the figure and the
+   backdrop shift by different amounts, so there is a little depth — enough
+   to feel alive, not enough to become the point. */
 const PortraitScene = () => {
   const reduce = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const spring = { stiffness: 120, damping: 18 };
-  const rx = useSpring(useTransform(my, [-0.5, 0.5], [5, -5]), spring);
-  const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-5, 5]), spring);
+  const rx = useSpring(useTransform(my, [-0.5, 0.5], [4, -4]), spring);
+  const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-4, 4]), spring);
+  /* figure leans with the pointer, backdrop drifts against it */
+  const fx = useSpring(useTransform(mx, [-0.5, 0.5], [-7, 7]), spring);
+  const fy = useSpring(useTransform(my, [-0.5, 0.5], [-4, 4]), spring);
+  const bx = useSpring(useTransform(mx, [-0.5, 0.5], [6, -6]), spring);
+  const by = useSpring(useTransform(my, [-0.5, 0.5], [5, -5]), spring);
   /* notes move the opposite way, a touch more — cheap parallax */
   const nx = useSpring(useTransform(mx, [-0.5, 0.5], [10, -10]), spring);
   const ny = useSpring(useTransform(my, [-0.5, 0.5], [10, -10]), spring);
@@ -271,39 +278,50 @@ const PortraitScene = () => {
         />
       </div>
 
-      {/* card */}
+      {/* the arch */}
       <motion.figure
         style={reduce ? undefined : { rotateX: rx, rotateY: ry }}
-        className="relative mx-auto max-w-[340px] overflow-hidden rounded-[30px] border border-line bg-raised p-2 shadow-[0_50px_100px_-40px_rgba(0,0,0,0.5)]"
+        className="relative mx-auto max-w-[340px]"
       >
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-surface">
-          <Image
-            src="/img/portrait.webp"
-            alt="Portrait of Ajith Thaduri"
-            fill
-            sizes="(max-width: 640px) 78vw, 340px"
-            className="object-cover"
-            priority
+        <div className="portrait-fade relative aspect-[4/5] overflow-hidden rounded-t-full">
+          <motion.div
+            aria-hidden
+            style={reduce ? undefined : { x: bx, y: by }}
+            className="portrait-backdrop absolute -inset-4"
           />
+          {/* a hairline doorway inside the arch */}
           <div
             aria-hidden
-            className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/0 to-transparent"
+            className="absolute inset-3 rounded-t-full border"
+            style={{ borderColor: "var(--portrait-line)" }}
           />
-          <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 text-white">
-            <div>
-              <p className="text-xl font-medium tracking-tight">Ajith Thaduri</p>
-              <p className="mt-1 text-sm text-white/70">AI Engineer · Consultant</p>
-            </div>
-            <span className="font-serif text-3xl italic leading-none text-white/80">A.</span>
-          </figcaption>
+          <motion.div style={reduce ? undefined : { x: fx, y: fy }} className="absolute inset-0 top-2">
+            <Image
+              src="/img/portrait-cutout.webp"
+              alt="Ajith Thaduri, smiling, in a red shirt"
+              fill
+              sizes="(max-width: 640px) 78vw, 340px"
+              className="object-cover object-bottom"
+              priority
+            />
+          </motion.div>
         </div>
+        <figcaption className="relative -mt-6 flex items-end justify-between gap-4 px-3">
+          <div>
+            <p className="text-xl font-medium tracking-tight text-text">Ajith Thaduri</p>
+            <p className="mt-1 text-sm text-muted">AI Engineer · Consultant</p>
+          </div>
+          <span aria-hidden className="font-serif text-3xl italic leading-none text-faint">
+            A.
+          </span>
+        </figcaption>
       </motion.figure>
 
       {/* floating notes — desktop and tablet; on phones they sit in a row below */}
       <motion.div style={reduce ? undefined : { x: nx, y: ny }} className="pointer-events-none absolute inset-0 hidden sm:block">
         <Note note={n1} className="drift absolute -top-2 right-0 max-w-[244px]" />
         <Note note={n2} className="drift-slow absolute right-0 top-[47%] max-w-[244px]" />
-        <Note note={n3} className="drift absolute bottom-[30%] left-0 max-w-[244px] [animation-delay:-3s]" />
+        <Note note={n3} className="drift absolute bottom-[19%] left-0 max-w-[244px] [animation-delay:-3s]" />
       </motion.div>
 
       <ul className="mt-6 grid gap-2 sm:hidden">
