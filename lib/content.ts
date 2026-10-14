@@ -75,7 +75,7 @@ export const HERO = {
      local time, so visitors can see at a glance whether I'm likely awake. */
   intro: {
     name: "Ajith Thaduri",
-    line: "AI engineer in Hyderabad, taking on new projects.",
+    line: "AI engineer in Hyderabad.",
     timeZone: "Asia/Kolkata",
   },
 };
@@ -576,7 +576,6 @@ export const CONTACT = {
   headline: ["Working on something", "like this?"],
   lede: "I'm open to AI engineering, architecture and training work. Tell me what you're building and what the constraints are — that's usually enough to start.",
   availability: [
-    { dot: "live", text: "Taking on new projects" },
     { dot: "accent", text: "Usually replies within a day" },
   ],
 };

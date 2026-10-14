@@ -51,7 +51,7 @@ export const Hero = () => {
       <Glow />
 
       <div className="relative mx-auto w-full max-w-6xl">
-        {/* who's talking — the photo, small, with a presence dot for "available" */}
+        {/* who's talking — the photo, small, with my local time */}
         <motion.div {...rise(0.05)}>
           <Link href="/about" className="group inline-flex items-center gap-4">
             <span className="relative shrink-0">
@@ -63,10 +63,6 @@ export const Hero = () => {
                 priority
                 className="h-14 w-14 rounded-full border border-line object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
               />
-              <span aria-hidden className="absolute bottom-0 right-0 flex h-3.5 w-3.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50 motion-reduce:animate-none" />
-                <span className="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-ink bg-emerald-400" />
-              </span>
             </span>
             <span className="leading-snug">
               <span className="block font-medium text-text decoration-line underline-offset-4 group-hover:underline">
