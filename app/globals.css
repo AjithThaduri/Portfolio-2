@@ -233,16 +233,16 @@ body {
   .page-enter { animation: none; }
 }
 
-/* Hero stage: an evening scene taken from the photo itself — deep evergreen,
-   warm skin-light, the red of the shirt. It is the same in both themes,
+/* Hero stage: a warm evening scene in the light the photo was taken in —
+   deep umber, gold out-of-focus light, the red of the shirt. It is the same in both themes,
    the way a photograph is. */
 .hero-stage {
-  --stage-base: #0a120d;
+  --stage-base: #120b06;
   --stage-ink: #f4efe6;
   --stage-ink-2: rgba(244, 239, 230, 0.76);
   --stage-ink-3: rgba(244, 239, 230, 0.52);
   --stage-amber: #f2b27c;
-  --stage-leaf: #4f8a5b;
+  --stage-leaf: #c98a3a;
   --stage-rose: #e2566e;
   --stage-line: rgba(244, 239, 230, 0.14);
   --stage-line-strong: rgba(244, 239, 230, 0.34);
@@ -254,8 +254,8 @@ body {
   --text: #f4efe6;
   --muted: rgba(244, 239, 230, 0.72);
   --faint: rgba(244, 239, 230, 0.55);
-  --ink: #0a120d;
-  --bg: #0a120d;
+  --ink: #120b06;
+  --bg: #120b06;
   --surface: rgba(244, 239, 230, 0.1);
   --raised: rgba(244, 239, 230, 0.06);
   --line: rgba(244, 239, 230, 0.2);
@@ -265,15 +265,15 @@ body {
 .stage-light {
   background:
     radial-gradient(34% 44% at 29% 40%, rgba(242, 178, 124, 0.26), transparent 72%),
-    linear-gradient(90deg, rgba(10, 18, 13, 0.1) 0%, rgba(10, 18, 13, 0.18) 42%, rgba(10, 18, 13, 0.78) 62%, rgba(10, 18, 13, 0.9) 100%),
-    linear-gradient(0deg, rgba(10, 18, 13, 0.7) 0%, transparent 30%),
-    linear-gradient(180deg, rgba(10, 18, 13, 0.55) 0%, transparent 24%);
+    linear-gradient(90deg, rgba(18, 11, 6, 0.1) 0%, rgba(18, 11, 6, 0.18) 42%, rgba(18, 11, 6, 0.78) 62%, rgba(18, 11, 6, 0.9) 100%),
+    linear-gradient(0deg, rgba(18, 11, 6, 0.7) 0%, transparent 30%),
+    linear-gradient(180deg, rgba(18, 11, 6, 0.55) 0%, transparent 24%);
 }
 @media (max-width: 1023px) {
   .stage-light {
     background:
       radial-gradient(70% 26% at 50% 24%, rgba(242, 178, 124, 0.22), transparent 72%),
-      linear-gradient(180deg, rgba(10, 18, 13, 0.5) 0%, transparent 16%, transparent 34%, rgba(10, 18, 13, 0.82) 54%, rgba(10, 18, 13, 0.92) 100%);
+      linear-gradient(180deg, rgba(18, 11, 6, 0.5) 0%, transparent 16%, transparent 34%, rgba(18, 11, 6, 0.82) 54%, rgba(18, 11, 6, 0.92) 100%);
   }
 }
 
