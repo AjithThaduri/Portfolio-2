@@ -48,7 +48,6 @@
   --portrait-1: #ffe6d3;
   --portrait-2: #f7c9ab;
   --portrait-3: #eaa283;
-  --portrait-line: rgba(255, 255, 255, 0.5);
 }
 
 :root[data-theme="dark"] {
@@ -86,7 +85,6 @@
   --portrait-1: #6e3d2a;    /* ember by night */
   --portrait-2: #3f2421;
   --portrait-3: #1d1315;
-  --portrait-line: rgba(255, 255, 255, 0.09);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -125,8 +123,6 @@
     --portrait-1: #6e3d2a;    /* ember by night */
     --portrait-2: #3f2421;
     --portrait-3: #1d1315;
-    --portrait-line: rgba(255, 255, 255, 0.09);
-  --portrait-line: rgba(255, 255, 255, 0.09);
   }
 }
 
@@ -237,30 +233,11 @@ body {
   .page-enter { animation: none; }
 }
 
-/* Hero: notes drift a few pixels; the orbit turns once every couple of minutes. */
-@keyframes drift {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-.drift { animation: drift 7s ease-in-out infinite; }
-.drift-slow { animation: drift 9s ease-in-out infinite; }
-
-@keyframes orbit {
-  to { transform: rotate(360deg); }
-}
-.orbit { animation: orbit 140s linear infinite; }
-.orbit-rev { animation: orbit 200s linear infinite reverse; }
-
 /* Portrait: the cut-out stands on a backdrop the theme paints, so the photo
    always sits in the site's own light rather than the studio's. */
 .portrait-backdrop {
   background:
     radial-gradient(120% 75% at 50% 18%, var(--portrait-1) 0%, var(--portrait-2) 52%, var(--portrait-3) 100%);
-}
-/* the hero arch dissolves into the page instead of ending at an edge */
-.portrait-fade {
-  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
 }
 
 @keyframes cue {

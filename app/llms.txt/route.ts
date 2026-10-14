@@ -40,7 +40,7 @@ export function GET() {
   lines.push("");
   lines.push(HERO.lede);
   lines.push("");
-  for (const s of HERO.stats) lines.push(`- ${s.value} — ${s.label}`);
+  lines.push(`- ${HERO.proof.value} ${HERO.proof.line}`);
   lines.push("");
   for (const para of ABOUT.body) {
     lines.push(para);
