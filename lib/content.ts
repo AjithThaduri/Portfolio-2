@@ -74,17 +74,18 @@ export const HERO = {
     { value: "10+", label: "Platforms in production" },
     { value: "3", label: "Regulated sectors" },
   ],
-  /* shown on the portrait card and the pill above the headline */
+  /* the pill above the headline */
   status: "Taking on new projects",
   sectorsLabel: "Shipped for",
   sectors: ["Healthcare", "Legal", "Government"],
-  /* Small glass notes floating around the portrait. Each is a real property
-     of a system on this site — keep them true and short. */
-  notes: [
-    { k: "PHI", v: "18+ categories redacted before any reasoning", tone: "teal" },
-    { k: "Deterministic", v: "Same case in, same answer out", tone: "accent" },
-    { k: "Verified", v: "Every finding reproduced before it's reported", tone: "live" },
-  ],
+  /* Caption under the portrait. The clock shows my local time, so visitors
+     can see at a glance whether I'm likely to be awake. */
+  portrait: {
+    name: "Ajith Thaduri",
+    role: "AI Engineer · Consultant",
+    city: "Hyderabad",
+    timeZone: "Asia/Kolkata",
+  },
 };
 
 export const WORK_INTRO = {
@@ -776,6 +777,8 @@ export const ENGAGE = {
   brief: {
     title: "Tell me about your project",
     lede: "Fill this in and it'll open as an email to me — nothing is stored on this site.",
+    /* shown with my photo beside the form */
+    note: "It comes straight to my inbox. I read every brief myself.",
     types: ["Architecture review", "Build", "Security test", "Training", "Something else"],
   },
 };
@@ -790,6 +793,8 @@ export const BLUEPRINTS_INTRO = {
     note: "A shorter opinion or lesson learned.",
   },
   license: "Text and diagrams are CC BY 4.0 — use them, adapt them, credit the source.",
+  /* byline on every article, with my photo */
+  author: "Ajith Thaduri",
 };
 
 /* Public code. "mine" are repos I wrote. "rely" credits other people's

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   motion,
@@ -14,12 +14,6 @@ import { HERO } from "@/lib/content";
 import { Button, Glow } from "./Section";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-
-const toneColour: Record<string, string> = {
-  teal: "var(--teal)",
-  accent: "var(--accent-vivid)",
-  live: "#34d399",
-};
 
 /* Line icons for the sector row — drawn at 20px, stroke follows text colour. */
 const SectorIcon = ({ name }: { name: string }) => {
@@ -219,20 +213,37 @@ export const Hero = () => {
   );
 };
 
-/* The portrait sits on two slow orbits, with three short, true notes about
-   the work drifting around it. The card leans a few degrees towards the
-   pointer — enough to feel alive, not enough to become the point. */
+/* My local time, for the caption. Rendered after mount so the server and
+   the browser never disagree about the minute. */
+const useLocalTime = (timeZone: string) => {
+  const [time, setTime] = useState<string | null>(null);
+  useEffect(() => {
+    const fmt = new Intl.DateTimeFormat("en-GB", { hour: "numeric", minute: "2-digit", hour12: true, timeZone });
+    const tick = () => setTime(fmt.format(new Date()).replace(/\s?([ap])m$/i, " $1m").toLowerCase());
+    tick();
+    const id = setInterval(tick, 20_000);
+    return () => clearInterval(id);
+  }, [timeZone]);
+  return time;
+};
+
+/* The photo is a cut-out standing in an arch whose backdrop the theme
+   paints, and the arch dissolves into the page. On pointer move the figure
+   and the backdrop shift by different amounts — a little depth, nothing
+   more. No badges: the words on the left already say what I do. */
 const PortraitScene = () => {
   const reduce = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
-  const spring = { stiffness: 120, damping: 18 };
-  const rx = useSpring(useTransform(my, [-0.5, 0.5], [5, -5]), spring);
-  const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-5, 5]), spring);
-  /* notes move the opposite way, a touch more — cheap parallax */
-  const nx = useSpring(useTransform(mx, [-0.5, 0.5], [10, -10]), spring);
-  const ny = useSpring(useTransform(my, [-0.5, 0.5], [10, -10]), spring);
+  const spring = { stiffness: 110, damping: 20 };
+  const rx = useSpring(useTransform(my, [-0.5, 0.5], [3, -3]), spring);
+  const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-3, 3]), spring);
+  /* figure leans with the pointer, backdrop drifts against it */
+  const fx = useSpring(useTransform(mx, [-0.5, 0.5], [-7, 7]), spring);
+  const fy = useSpring(useTransform(my, [-0.5, 0.5], [-4, 4]), spring);
+  const bx = useSpring(useTransform(mx, [-0.5, 0.5], [6, -6]), spring);
+  const by = useSpring(useTransform(my, [-0.5, 0.5], [5, -5]), spring);
 
   const onMove = (e: React.PointerEvent) => {
     if (reduce || e.pointerType !== "mouse" || !ref.current) return;
@@ -245,96 +256,67 @@ const PortraitScene = () => {
     my.set(0);
   };
 
-  const [n1, n2, n3] = HERO.notes;
+  const p = HERO.portrait;
+  const time = useLocalTime(p.timeZone);
 
   return (
     <div
       ref={ref}
       onPointerMove={onMove}
       onPointerLeave={onLeave}
-      className="relative px-6 py-10 sm:px-10"
+      className="relative px-6 py-8 sm:px-10"
       style={{ perspective: 1200 }}
     >
-      {/* orbits */}
+      {/* one soft light behind the arch */}
       <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <svg viewBox="0 0 400 400" className="orbit absolute h-[118%] w-[118%] text-line">
-          <circle cx="200" cy="200" r="196" fill="none" stroke="currentColor" strokeDasharray="2 7" />
-          <circle cx="200" cy="4" r="3.5" fill="var(--accent-vivid)" />
-        </svg>
-        <svg viewBox="0 0 400 400" className="orbit-rev absolute h-[90%] w-[90%] text-line">
-          <circle cx="200" cy="200" r="196" fill="none" stroke="currentColor" />
-          <circle cx="4" cy="200" r="3" fill="var(--teal)" />
-        </svg>
         <div
-          className="absolute h-[70%] w-[70%] rounded-full blur-3xl"
+          className="h-[78%] w-[78%] rounded-full blur-3xl"
           style={{ background: "var(--accent-vivid)", opacity: "var(--glow-a)" }}
         />
       </div>
 
-      {/* card */}
       <motion.figure
         style={reduce ? undefined : { rotateX: rx, rotateY: ry }}
-        className="relative mx-auto max-w-[340px] overflow-hidden rounded-[30px] border border-line bg-raised p-2 shadow-[0_50px_100px_-40px_rgba(0,0,0,0.5)]"
+        className="relative mx-auto max-w-[360px]"
       >
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-surface">
-          <Image
-            src="/img/portrait.webp"
-            alt="Portrait of Ajith Thaduri"
-            fill
-            sizes="(max-width: 640px) 78vw, 340px"
-            className="object-cover"
-            priority
+        <div className="portrait-fade relative aspect-[4/5] overflow-hidden rounded-t-full">
+          <motion.div
+            aria-hidden
+            style={reduce ? undefined : { x: bx, y: by }}
+            className="portrait-backdrop absolute -inset-4"
           />
+          {/* a hairline doorway inside the arch */}
           <div
             aria-hidden
-            className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/0 to-transparent"
+            className="absolute inset-3 rounded-t-full border"
+            style={{ borderColor: "var(--portrait-line)" }}
           />
-          <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 text-white">
-            <div>
-              <p className="text-xl font-medium tracking-tight">Ajith Thaduri</p>
-              <p className="mt-1 text-sm text-white/70">AI Engineer · Consultant</p>
-            </div>
-            <span className="font-serif text-3xl italic leading-none text-white/80">A.</span>
-          </figcaption>
+          <motion.div style={reduce ? undefined : { x: fx, y: fy }} className="absolute inset-0 top-2">
+            <Image
+              src="/img/portrait-cutout.webp"
+              alt="Ajith Thaduri, smiling, in a red shirt"
+              fill
+              sizes="(max-width: 640px) 80vw, 360px"
+              className="object-cover object-bottom"
+              priority
+            />
+          </motion.div>
         </div>
+
+        <figcaption className="relative -mt-8 flex flex-wrap items-end justify-between gap-x-4 gap-y-1 px-2">
+          <div>
+            <p className="text-xl font-medium tracking-tight text-text">{p.name}</p>
+            <p className="mt-1 whitespace-nowrap text-sm text-muted">{p.role}</p>
+          </div>
+          <p className="min-h-[1.25rem] whitespace-nowrap text-sm text-faint">
+            {time && (
+              <>
+                <span className="text-muted">{time}</span> in {p.city}
+              </>
+            )}
+          </p>
+        </figcaption>
       </motion.figure>
-
-      {/* floating notes — desktop and tablet; on phones they sit in a row below */}
-      <motion.div style={reduce ? undefined : { x: nx, y: ny }} className="pointer-events-none absolute inset-0 hidden sm:block">
-        <Note note={n1} className="drift absolute -top-2 right-0 max-w-[244px]" />
-        <Note note={n2} className="drift-slow absolute right-0 top-[47%] max-w-[244px]" />
-        <Note note={n3} className="drift absolute bottom-[30%] left-0 max-w-[244px] [animation-delay:-3s]" />
-      </motion.div>
-
-      <ul className="mt-6 grid gap-2 sm:hidden">
-        {HERO.notes.map((n) => (
-          <li key={n.k}>
-            <Note note={n} />
-          </li>
-        ))}
-      </ul>
     </div>
   );
 };
-
-const Note = ({
-  note,
-  className = "",
-}: {
-  note: { k: string; v: string; tone: string };
-  className?: string;
-}) => (
-  <div
-    className={`rounded-2xl border border-line bg-raised/85 px-4 py-3 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.35)] backdrop-blur-xl ${className}`}
-  >
-    <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
-      <span
-        aria-hidden
-        className="h-1.5 w-1.5 rounded-full"
-        style={{ background: toneColour[note.tone], boxShadow: `0 0 10px ${toneColour[note.tone]}` }}
-      />
-      {note.k}
-    </p>
-    <p className="mt-1.5 text-[13px] leading-snug text-text">{note.v}</p>
-  </div>
-);

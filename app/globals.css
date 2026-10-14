@@ -43,6 +43,12 @@
   --sim-halo: 0.11;
   --sim-lane: 0.22;
   --sim-scale: 1.5;
+
+  /* studio backdrop behind the portrait cut-out: warm peach by day */
+  --portrait-1: #ffe6d3;
+  --portrait-2: #f7c9ab;
+  --portrait-3: #eaa283;
+  --portrait-line: rgba(255, 255, 255, 0.5);
 }
 
 :root[data-theme="dark"] {
@@ -77,6 +83,10 @@
   --sim-halo: 0.16;
   --sim-lane: 0.026;
   --sim-scale: 1;
+  --portrait-1: #6e3d2a;    /* ember by night */
+  --portrait-2: #3f2421;
+  --portrait-3: #1d1315;
+  --portrait-line: rgba(255, 255, 255, 0.09);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -112,6 +122,11 @@
     --sim-halo: 0.16;
     --sim-lane: 0.026;
     --sim-scale: 1;
+    --portrait-1: #6e3d2a;    /* ember by night */
+    --portrait-2: #3f2421;
+    --portrait-3: #1d1315;
+    --portrait-line: rgba(255, 255, 255, 0.09);
+  --portrait-line: rgba(255, 255, 255, 0.09);
   }
 }
 
@@ -235,6 +250,18 @@ body {
 }
 .orbit { animation: orbit 140s linear infinite; }
 .orbit-rev { animation: orbit 200s linear infinite reverse; }
+
+/* Portrait: the cut-out stands on a backdrop the theme paints, so the photo
+   always sits in the site's own light rather than the studio's. */
+.portrait-backdrop {
+  background:
+    radial-gradient(120% 75% at 50% 18%, var(--portrait-1) 0%, var(--portrait-2) 52%, var(--portrait-3) 100%);
+}
+/* the hero arch dissolves into the page instead of ending at an edge */
+.portrait-fade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+}
 
 @keyframes cue {
   0% { transform: scaleY(0); transform-origin: top; }
