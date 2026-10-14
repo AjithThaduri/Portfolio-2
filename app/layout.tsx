@@ -3,7 +3,7 @@ import { Inter, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Analytics } from "@vercel/analytics/next";
-import { SITE, FAQ } from "@/lib/content";
+import { SITE, FAQ, PHOTOS } from "@/lib/content";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -82,14 +82,32 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   /* Structured data: a ProfilePage wrapping a Person, plus an FAQPage.
      This is what Google's Knowledge Graph and answer engines read. */
+  const photo = (p: { src: string; width: number; height: number; caption: string }, id: string) => ({
+    "@type": "ImageObject",
+    "@id": `${SITE.url}#${id}`,
+    url: `${SITE.url}${p.src}`,
+    contentUrl: `${SITE.url}${p.src}`,
+    width: p.width,
+    height: p.height,
+    caption: p.caption,
+    name: PHOTOS.name,
+  });
+  // Square first: it is the one Google prefers for a person's image.
+  const images = [
+    photo(PHOTOS.square, "photo-1x1"),
+    photo(PHOTOS.landscape, "photo-4x3"),
+    photo(PHOTOS.wide, "photo-16x9"),
+  ];
   const person = {
     "@type": "Person",
     "@id": `${SITE.url}#person`,
     name: "Ajith Thaduri",
+    alternateName: ["Thaduri Ajith"],
     givenName: "Ajith",
     familyName: "Thaduri",
     url: SITE.url,
-    image: `${SITE.url}/img/portrait-square.jpg`,
+    mainEntityOfPage: { "@id": `${SITE.url}#profile` },
+    image: images,
     email: `mailto:${SITE.email}`,
     jobTitle: ["AI Engineer", "Technical Consultant", "Instructor"],
     description:
@@ -161,6 +179,9 @@ export default function RootLayout({
         isPartOf: { "@id": `${SITE.url}#website` },
         about: { "@id": `${SITE.url}#person` },
         mainEntity: { "@id": `${SITE.url}#person` },
+        primaryImageOfPage: { "@id": `${SITE.url}#photo-1x1` },
+        // Page timestamp for crawlers, set at build; not shown on the site.
+        dateModified: new Date().toISOString(),
       },
       person,
       {

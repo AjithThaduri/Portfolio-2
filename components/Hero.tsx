@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { HERO } from "@/lib/content";
+import { HERO, PHOTOS } from "@/lib/content";
 import { Button, Glow } from "./Section";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -160,8 +160,8 @@ const PhotoPanel = ({ name, line, time }: { name: string; line: string; time: st
     >
       <motion.div style={reduce ? undefined : { y }} className="absolute inset-x-0 -top-[7%] h-[114%]">
         <Image
-          src="/img/portrait-hero.jpg"
-          alt="Ajith Thaduri, smiling, outdoors in the evening"
+          src={PHOTOS.portrait.src}
+          alt={PHOTOS.alt}
           fill
           priority
           sizes="(max-width: 1024px) 92vw, 500px"

@@ -12,6 +12,7 @@ import {
   FAQ,
   CAPABILITIES,
   OPEN_SOURCE,
+  PHOTOS,
 } from "@/lib/content";
 import { getAllBlueprints } from "@/lib/blueprints";
 
@@ -34,6 +35,7 @@ export function GET() {
   lines.push(`- LinkedIn: ${SITE.linkedin}`);
   lines.push(`- GitHub: ${SITE.github}`);
   lines.push(`- Location: ${SITE.location}`);
+  lines.push(`- Photo: ${SITE.url}${PHOTOS.square.src}`);
   lines.push("");
 
   lines.push("## Summary");
