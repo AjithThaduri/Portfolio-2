@@ -89,6 +89,7 @@ export default function RootLayout({
     givenName: "Ajith",
     familyName: "Thaduri",
     url: SITE.url,
+    image: `${SITE.url}/img/portrait-square.jpg`,
     email: `mailto:${SITE.email}`,
     jobTitle: ["AI Engineer", "Technical Consultant", "Instructor"],
     description:

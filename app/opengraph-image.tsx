@@ -1,10 +1,15 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
 export const alt = "Ajith Thaduri — AI Engineer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const photo = await readFile(join(process.cwd(), "public/img/portrait-square.jpg"));
+  const src = `data:image/jpeg;base64,${photo.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -33,27 +38,47 @@ export default function OpengraphImage() {
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div
-            style={{
-              color: "#eceef1",
-              fontSize: 76,
-              lineHeight: 1.05,
-              letterSpacing: -2.5,
-            }}
-          >
-            I build AI systems for teams
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 48,
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div
+              style={{
+                color: "#eceef1",
+                fontSize: 64,
+                lineHeight: 1.05,
+                letterSpacing: -2.5,
+              }}
+            >
+              I build AI systems for teams
+            </div>
+            <div
+              style={{
+                color: "#a3a4ac",
+                fontSize: 64,
+                lineHeight: 1.05,
+                letterSpacing: -2.5,
+              }}
+            >
+              handling sensitive data.
+            </div>
           </div>
-          <div
+          <img
+            src={src}
+            alt=""
+            width={260}
+            height={260}
             style={{
-              color: "#a3a4ac",
-              fontSize: 76,
-              lineHeight: 1.05,
-              letterSpacing: -2.5,
+              borderRadius: 32,
+              border: "2px solid #212127",
+              objectFit: "cover",
             }}
-          >
-            handling sensitive data.
-          </div>
+          />
         </div>
 
         <div
