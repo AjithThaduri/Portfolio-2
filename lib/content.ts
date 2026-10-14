@@ -58,11 +58,11 @@ export const PHOTOS = {
   landscape: { src: "/img/ajith-thaduri-4x3.jpg", width: 1600, height: 1200, caption: PHOTO_CAPTION },
   wide: { src: "/img/ajith-thaduri-16x9.jpg", width: 1920, height: 1080, caption: PHOTO_CAPTION },
   cutout: { src: "/img/portrait-cutout.webp" },
-  /* The hero is built in depth: the evening greenery on its own, and me cut
-     out in front of it, so each can move at its own speed. */
+  /* The hero is built in depth: a field of warm, out-of-focus light on its
+     own, and me cut out in front of it, so each can move at its own speed. */
   hero: {
     subject: { src: "/img/ajith-thaduri-hero-front.webp", width: 1500, height: 1450 },
-    plate: { src: "/img/hero-evening-plate.jpg", width: 2400, height: 1350 },
+    plate: { src: "/img/hero-gold-plate.jpg", width: 2400, height: 1350 },
   },
 } as const;
 
