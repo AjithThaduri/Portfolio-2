@@ -14,7 +14,7 @@ export function generateStaticParams() {
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const b = getBlueprint(slug);
-  const photo = await readFile(join(process.cwd(), "public/img/portrait-square.jpg"));
+  const photo = await readFile(join(process.cwd(), "public/img/ajith-thaduri.jpg"));
   const src = `data:image/jpeg;base64,${photo.toString("base64")}`;
   return new ImageResponse(
     (

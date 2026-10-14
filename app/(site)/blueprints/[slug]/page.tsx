@@ -12,7 +12,7 @@ import {
   CODE_REPO,
   TYPE_LABEL,
 } from "@/lib/blueprints";
-import { BLUEPRINTS_INTRO, CAPABILITIES, FLAGSHIP, SITE } from "@/lib/content";
+import { BLUEPRINTS_INTRO, CAPABILITIES, FLAGSHIP, PHOTOS, SITE } from "@/lib/content";
 import { BlueprintCard, StatusBadge } from "@/components/blueprint/BlueprintCard";
 import { CopyMarkdown } from "@/components/blueprint/CopyMarkdown";
 import { RepoList } from "@/components/blueprint/RepoList";
@@ -110,7 +110,7 @@ export default async function BlueprintPage({ params }: Props) {
                 className="inline-flex items-center gap-2.5 font-medium text-text transition-colors hover:text-accent"
               >
                 <Image
-                  src="/img/portrait-square.jpg"
+                  src={PHOTOS.square.src}
                   alt=""
                   width={32}
                   height={32}

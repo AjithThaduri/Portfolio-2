@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ENGAGE } from "@/lib/content";
+import { ENGAGE, PHOTOS } from "@/lib/content";
 import { ProjectBrief } from "@/components/ProjectBrief";
 import { Reveal } from "@/components/Reveal";
 import { PageHeader, Section, SectionHead } from "@/components/Section";
@@ -65,8 +65,8 @@ export default function WorkWithMe() {
             <SectionHead eyebrow={ENGAGE.brief.title} title="A few lines is enough." lede={ENGAGE.brief.lede} className="!mb-10" />
             <div className="mb-5 flex items-center gap-4">
               <Image
-                src="/img/portrait-square.jpg"
-                alt=""
+                src={PHOTOS.square.src}
+                alt={PHOTOS.name}
                 width={48}
                 height={48}
                 className="h-12 w-12 shrink-0 rounded-full border border-line"

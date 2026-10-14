@@ -46,6 +46,20 @@ export const SITE = {
   location: "Hyderabad, India",
 } as const;
 
+/* Photos of Ajith. File names carry his name so image search can connect
+   them to him; the same files feed the page, the JSON-LD and the sitemap. */
+const PHOTO_CAPTION = "Ajith Thaduri, AI engineer, smiling outdoors in the evening";
+export const PHOTOS = {
+  name: "Ajith Thaduri",
+  alt: PHOTO_CAPTION,
+  aboutAlt: "Ajith Thaduri, AI engineer, smiling, in a red shirt",
+  square: { src: "/img/ajith-thaduri.jpg", width: 1200, height: 1200, caption: PHOTO_CAPTION },
+  portrait: { src: "/img/ajith-thaduri-portrait.jpg", width: 1600, height: 2000, caption: PHOTO_CAPTION },
+  landscape: { src: "/img/ajith-thaduri-4x3.jpg", width: 1600, height: 1200, caption: PHOTO_CAPTION },
+  wide: { src: "/img/ajith-thaduri-16x9.jpg", width: 1920, height: 1080, caption: PHOTO_CAPTION },
+  cutout: { src: "/img/portrait-cutout.webp" },
+} as const;
+
 export const NAV = [
   { label: "Work", href: "/work" },
   { label: "Blueprints", href: "/blueprints" },
