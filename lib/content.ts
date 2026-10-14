@@ -65,25 +65,17 @@ export type Cap =
   | "evaluation";
 
 export const HERO = {
-  eyebrow: "AI Engineer · Hyderabad, India",
   /* The last line is set in the serif accent. Its closing full stop is also
      the hidden door to /vasuki — keep a full stop at the end of it. */
   headline: ["I build AI systems for teams", "handling sensitive data."],
   lede: "Mostly in healthcare, legal and government work — where records are private and answers get checked. I design how the data stays protected, how the model reasons, and how every answer can be traced back to its source.",
-  stats: [
-    { value: "10+", label: "Platforms in production" },
-    { value: "3", label: "Regulated sectors" },
-  ],
-  /* the pill above the headline */
-  status: "Taking on new projects",
-  sectorsLabel: "Shipped for",
-  sectors: ["Healthcare", "Legal", "Government"],
-  /* Caption under the portrait. The clock shows my local time, so visitors
-     can see at a glance whether I'm likely to be awake. */
-  portrait: {
+  /* One fact beside the lede — the sectors are already named in it. */
+  proof: { value: "10+", line: "AI platforms in production, across three regulated sectors." },
+  /* The line beside my photo at the top of the hero. The clock shows my
+     local time, so visitors can see at a glance whether I'm likely awake. */
+  intro: {
     name: "Ajith Thaduri",
-    role: "AI Engineer · Consultant",
-    city: "Hyderabad",
+    line: "AI engineer in Hyderabad, taking on new projects.",
     timeZone: "Asia/Kolkata",
   },
 };
