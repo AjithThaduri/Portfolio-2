@@ -301,8 +301,8 @@ const PortraitScene = () => {
 
       {/* floating notes — desktop and tablet; on phones they sit in a row below */}
       <motion.div style={reduce ? undefined : { x: nx, y: ny }} className="pointer-events-none absolute inset-0 hidden sm:block">
-        <Note note={n1} className="drift absolute left-2 top-[10%] max-w-[244px]" />
-        <Note note={n2} className="drift-slow absolute right-0 top-[40%] max-w-[244px]" />
+        <Note note={n1} className="drift absolute -top-2 right-0 max-w-[244px]" />
+        <Note note={n2} className="drift-slow absolute right-0 top-[47%] max-w-[244px]" />
         <Note note={n3} className="drift absolute bottom-[30%] left-0 max-w-[244px] [animation-delay:-3s]" />
       </motion.div>
 
