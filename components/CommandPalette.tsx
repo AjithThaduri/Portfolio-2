@@ -42,7 +42,7 @@ export const CommandPalette = ({ items }: { items: SearchItem[] }) => {
   const results = useMemo(() => {
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
     if (!words.length) return items.filter((x) => x.group === "Pages" || x.group === "Blueprints");
-    return items
+    const scored = items
       .map((x) => {
         const hay = `${x.title} ${x.hint ?? ""} ${x.group}`.toLowerCase();
         if (!words.every((w) => hay.includes(w))) return null;
@@ -53,6 +53,9 @@ export const CommandPalette = ({ items }: { items: SearchItem[] }) => {
       .sort((a, b) => b.score - a.score)
       .slice(0, 12)
       .map((r) => r.x);
+    // Keep each group together (best group first) so a heading shows once.
+    const order = [...new Set(scored.map((x) => x.group))];
+    return order.flatMap((g) => scored.filter((x) => x.group === g));
   }, [q, items]);
 
   const go = (href: string) => {
@@ -95,7 +98,10 @@ export const CommandPalette = ({ items }: { items: SearchItem[] }) => {
             className="w-full max-w-xl overflow-hidden rounded-3xl border border-line bg-raised shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)]"
           >
             <div className="flex items-center gap-3 border-b border-line px-5">
-              <span aria-hidden className="text-faint">⌕</span>
+              <svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 text-faint">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
               <input
                 autoFocus
                 value={q}
@@ -108,16 +114,24 @@ export const CommandPalette = ({ items }: { items: SearchItem[] }) => {
                 aria-label="Search"
                 aria-activedescendant={results[i] ? `cmd-${i}` : undefined}
                 aria-controls="cmd-results"
-                className="h-14 flex-1 bg-transparent text-text placeholder:text-faint focus:outline-none"
+                className="cmd-input h-14 min-w-0 flex-1 bg-transparent text-base text-text placeholder:text-faint"
+                style={{ outline: "none" }}
               />
-              <kbd className="rounded-md border border-line px-1.5 py-0.5 font-mono text-[10px] text-faint">esc</kbd>
+              <kbd className="hidden rounded-md border border-line px-1.5 py-0.5 font-mono text-[10px] text-faint sm:inline">esc</kbd>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="-mr-2 rounded-full px-3 py-1.5 text-sm text-muted hover:text-text sm:hidden"
+              >
+                Close
+              </button>
             </div>
             <ul id="cmd-results" role="listbox" data-lenis-prevent className="max-h-[55vh] overflow-y-auto overscroll-contain p-2">
               {results.length === 0 && <li className="px-4 py-8 text-center text-sm text-faint">No matches.</li>}
               {results.map((r, idx) => {
                 const header = idx === 0 || results[idx - 1].group !== r.group;
                 return (
-                  <li key={`${r.group}-${r.href}`} role="presentation">
+                  <li key={`${r.group}-${r.href}-${r.title}`} role="presentation">
                     {header && (
                       <p className="px-3 pb-1 pt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
                         {r.group}

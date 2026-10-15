@@ -157,6 +157,9 @@ body {
   outline-offset: 3px;
   border-radius: 2px;
 }
+/* The search box sits in its own panel with a caret; a ring around it only
+   gets clipped by the panel's rounded edge. */
+.cmd-input:focus-visible { outline: none; }
 
 /* Code highlighting (sugar-high) — mapped onto the theme tokens. */
 :root {
@@ -221,20 +224,6 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .page-enter { animation: none; }
 }
-
-/* Hero: notes drift a few pixels; the orbit turns once every couple of minutes. */
-@keyframes drift {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-.drift { animation: drift 7s ease-in-out infinite; }
-.drift-slow { animation: drift 9s ease-in-out infinite; }
-
-@keyframes orbit {
-  to { transform: rotate(360deg); }
-}
-.orbit { animation: orbit 140s linear infinite; }
-.orbit-rev { animation: orbit 200s linear infinite reverse; }
 
 @keyframes cue {
   0% { transform: scaleY(0); transform-origin: top; }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ABOUT } from "@/lib/content";
+import { ABOUT, PHOTOS } from "@/lib/content";
 import { Faq } from "@/components/Faq";
 import { ModelWork } from "@/components/ModelWork";
 import { Reveal } from "@/components/Reveal";
@@ -8,10 +8,30 @@ import { PageHeader } from "@/components/Section";
 import { Stack } from "@/components/Stack";
 
 export const metadata: Metadata = {
-  title: "About",
+  // Absolute, so the layout template doesn't repeat the name.
+  title: { absolute: "About Ajith Thaduri — AI Engineer" },
   description:
     "Who I am, how I approach AI systems for sensitive data, the model work below the prompt layer, and the tools I use.",
   alternates: { canonical: "/about" },
+  openGraph: {
+    type: "profile",
+    url: "/about",
+    title: "About Ajith Thaduri",
+    description:
+      "Who I am, how I approach AI systems for sensitive data, and the tools I use.",
+    firstName: "Ajith",
+    lastName: "Thaduri",
+    images: [
+      { url: PHOTOS.square.src, width: PHOTOS.square.width, height: PHOTOS.square.height, alt: PHOTOS.name },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "About Ajith Thaduri",
+    description:
+      "Who I am, how I approach AI systems for sensitive data, and the tools I use.",
+    images: [{ url: PHOTOS.square.src, alt: PHOTOS.name }],
+  },
 };
 
 export default function About() {
@@ -25,8 +45,8 @@ export default function About() {
             <div className="overflow-hidden rounded-[28px] border border-line bg-raised p-2">
               <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-surface">
                 <Image
-                  src="/img/portrait.webp"
-                  alt="Portrait of Ajith Thaduri"
+                  src={PHOTOS.about.src}
+                  alt={PHOTOS.about.alt}
                   fill
                   sizes="(max-width: 1024px) 80vw, 320px"
                   className="object-cover"

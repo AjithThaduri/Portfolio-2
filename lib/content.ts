@@ -46,6 +46,21 @@ export const SITE = {
   location: "Hyderabad, India",
 } as const;
 
+/* Photos of Ajith. File names carry his name so image search can connect
+   them to him; the same files feed the page, the JSON-LD and the sitemap. */
+const PHOTO_CAPTION = "Ajith Thaduri, AI engineer in Hyderabad, smiling, in a red shirt";
+export const PHOTOS = {
+  name: "Ajith Thaduri",
+  alt: PHOTO_CAPTION,
+  square: { src: "/img/ajith-thaduri.jpg", width: 1200, height: 1200, caption: PHOTO_CAPTION },
+  portrait: { src: "/img/ajith-thaduri-portrait.jpg", width: 1600, height: 2000, caption: PHOTO_CAPTION },
+  landscape: { src: "/img/ajith-thaduri-4x3.jpg", width: 1600, height: 1200, caption: PHOTO_CAPTION },
+  wide: { src: "/img/ajith-thaduri-16x9.jpg", width: 1920, height: 1080, caption: PHOTO_CAPTION },
+  avatar: { src: "/img/ajith-thaduri-avatar.jpg", alt: "Ajith Thaduri" },
+  /* the studio photo on the About page */
+  about: { src: "/img/ajith-thaduri-about.webp", alt: "Ajith Thaduri, AI engineer, smiling, in a red shirt" },
+} as const;
+
 export const NAV = [
   { label: "Work", href: "/work" },
   { label: "Blueprints", href: "/blueprints" },
@@ -65,26 +80,18 @@ export type Cap =
   | "evaluation";
 
 export const HERO = {
-  eyebrow: "AI Engineer · Hyderabad, India",
   /* The last line is set in the serif accent. Its closing full stop is also
      the hidden door to /vasuki — keep a full stop at the end of it. */
   headline: ["I build AI systems for teams", "handling sensitive data."],
   lede: "Mostly in healthcare, legal and government work — where records are private and answers get checked. I design how the data stays protected, how the model reasons, and how every answer can be traced back to its source.",
-  stats: [
-    { value: "10+", label: "Platforms in production" },
-    { value: "3", label: "Regulated sectors" },
-  ],
-  /* shown on the portrait card and the pill above the headline */
-  status: "Taking on new projects",
-  sectorsLabel: "Shipped for",
-  sectors: ["Healthcare", "Legal", "Government"],
-  /* Small glass notes floating around the portrait. Each is a real property
-     of a system on this site — keep them true and short. */
-  notes: [
-    { k: "PHI", v: "18+ categories redacted before any reasoning", tone: "teal" },
-    { k: "Deterministic", v: "Same case in, same answer out", tone: "accent" },
-    { k: "Verified", v: "Every finding reproduced before it's reported", tone: "live" },
-  ],
+  /* One fact beside the lede — the sectors are already named in it. */
+  proof: { value: "10+", line: "AI platforms in production, across three regulated sectors." },
+  /* The line beside my photo at the top of the hero. */
+  intro: {
+    name: "Ajith Thaduri",
+    line: "AI engineer in Hyderabad.",
+    timeZone: "Asia/Kolkata",
+  },
 };
 
 export const WORK_INTRO = {
@@ -790,6 +797,8 @@ export const BLUEPRINTS_INTRO = {
     note: "A shorter opinion or lesson learned.",
   },
   license: "Text and diagrams are CC BY 4.0 — use them, adapt them, credit the source.",
+  /* byline on every article, with my photo */
+  author: "Ajith Thaduri",
 };
 
 /* Public code. "mine" are repos I wrote. "rely" credits other people's
