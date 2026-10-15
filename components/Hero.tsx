@@ -160,12 +160,12 @@ const PhotoPanel = ({ name, line, time }: { name: string; line: string; time: st
     >
       <motion.div style={reduce ? undefined : { y }} className="absolute inset-x-0 -top-[7%] h-[114%]">
         <Image
-          src="/img/portrait-hero.jpg"
-          alt="Ajith Thaduri, smiling, outdoors in the evening"
+          src="/img/ajith-thaduri-hero-panel.jpg"
+          alt="Ajith Thaduri, smiling, facing the camera"
           fill
           priority
           sizes="(max-width: 1024px) 92vw, 500px"
-          className="object-cover object-[50%_24%] sm:object-center"
+          className="object-cover object-[50%_22%] sm:object-center"
         />
       </motion.div>
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
