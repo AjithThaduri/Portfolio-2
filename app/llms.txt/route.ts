@@ -12,6 +12,7 @@ import {
   FAQ,
   CAPABILITIES,
   OPEN_SOURCE,
+  PHOTOS,
 } from "@/lib/content";
 import { getAllBlueprints } from "@/lib/blueprints";
 
@@ -34,13 +35,14 @@ export function GET() {
   lines.push(`- LinkedIn: ${SITE.linkedin}`);
   lines.push(`- GitHub: ${SITE.github}`);
   lines.push(`- Location: ${SITE.location}`);
+  lines.push(`- Photo: ${SITE.url}${PHOTOS.square.src}`);
   lines.push("");
 
   lines.push("## Summary");
   lines.push("");
   lines.push(HERO.lede);
   lines.push("");
-  for (const s of HERO.stats) lines.push(`- ${s.value} — ${s.label}`);
+  lines.push(`- ${HERO.proof.value} ${HERO.proof.line}`);
   lines.push("");
   for (const para of ABOUT.body) {
     lines.push(para);

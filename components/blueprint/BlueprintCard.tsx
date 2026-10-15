@@ -20,27 +20,21 @@ export const StatusBadge = ({ status }: { status: BlueprintMeta["status"] }) => 
 );
 
 export const BlueprintCard = ({ b }: { b: BlueprintMeta }) => (
-  <Link
-    href={`/blueprints/${b.slug}`}
-    className="group relative flex h-full flex-col rounded-3xl border border-line bg-raised p-7 transition-all duration-500 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[var(--card-glow)]"
-  >
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
-        {TYPE_LABEL[b.type]}
-      </span>
-      {b.draft && (
-        <span className="ml-auto rounded-full bg-flag/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-flag">
-          Draft
-        </span>
-      )}
+  <Link href={`/blueprints/${b.slug}`} className="group flex h-full flex-col border-t border-line pt-6">
+    <div className="flex flex-wrap items-baseline justify-between gap-3 text-sm">
+      <span className="font-serif text-base italic text-muted">{TYPE_LABEL[b.type]}</span>
+      <span className="text-faint">{formatDate(b.updated ?? b.published)}</span>
     </div>
-    <h3 className="mt-6 text-xl font-medium leading-snug tracking-tight text-text">{b.title}</h3>
-    <p className="mt-3 flex-1 text-[0.95rem] font-light leading-relaxed text-muted">{b.summary}</p>
-    <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
+    {b.draft && (
+      <span className="mt-3 w-fit rounded-full bg-flag/15 px-2.5 py-0.5 text-xs text-flag">Draft</span>
+    )}
+    <h3 className="mt-4 text-xl font-medium leading-snug tracking-tight text-text transition-colors duration-300 group-hover:text-accent">
+      {b.title}
+    </h3>
+    <p className="mt-3 flex-1 text-pretty text-[0.95rem] font-light leading-relaxed text-muted">{b.summary}</p>
+    <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-faint">
       <StatusBadge status={b.status} />
-      <span className="text-xs text-faint">
-        {formatDate(b.updated ?? b.published)} · {b.readingMinutes} min
-      </span>
+      <span>{b.readingMinutes} min read</span>
     </div>
   </Link>
 );

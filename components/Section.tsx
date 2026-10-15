@@ -2,37 +2,60 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { Reveal } from "./Reveal";
 
-/** Small mono label with a short accent rule — used above every heading. */
-export const Eyebrow = ({ children, as: Tag = "p" }: { children: ReactNode; as?: "p" | "h2" }) => (
-  <Tag className="flex items-center gap-3 font-mono text-[11px] font-normal uppercase tracking-[0.2em] text-accent">
-    <span aria-hidden className="bg-gradient-brand h-px w-6" />
-    {children}
-  </Tag>
+/** The section's name, set as a quiet serif note. On wide screens it sits in
+    the left margin beside the heading, like a running head in a book. */
+export const Eyebrow = ({
+  children,
+  as: Tag = "p",
+  className = "",
+}: {
+  children: ReactNode;
+  as?: "p" | "h2";
+  className?: string;
+}) => (
+  <Tag className={`font-serif text-lg font-normal italic leading-snug text-muted ${className}`}>{children}</Tag>
 );
 
 export const SectionHead = ({
   eyebrow,
   title,
   lede,
+  rail = false,
   className = "",
 }: {
   eyebrow: string;
   title: ReactNode;
   lede?: string;
+  /** put the section name in the left margin (wide screens) */
+  rail?: boolean;
   className?: string;
-}) => (
-  <Reveal className={`mb-14 max-w-3xl md:mb-20 ${className}`}>
-    <Eyebrow>{eyebrow}</Eyebrow>
-    <h2 className="mt-6 text-balance text-3xl font-medium leading-[1.1] tracking-[-0.025em] text-text sm:text-4xl md:text-[2.75rem]">
-      {title}
-    </h2>
-    {lede && (
-      <p className="mt-6 max-w-2xl text-pretty text-lg font-light leading-relaxed text-muted">
-        {lede}
-      </p>
-    )}
-  </Reveal>
-);
+}) => {
+  const heading = (
+    <>
+      <h2 className="text-balance text-3xl font-medium leading-[1.1] tracking-[-0.025em] text-text sm:text-4xl md:text-[2.75rem]">
+        {title}
+      </h2>
+      {lede && (
+        <p className="mt-6 max-w-2xl text-pretty text-lg font-light leading-relaxed text-muted">
+          {lede}
+        </p>
+      )}
+    </>
+  );
+  if (rail)
+    return (
+      <Reveal className={`mb-14 grid gap-3 md:mb-20 lg:grid-cols-12 lg:gap-8 ${className}`}>
+        <Eyebrow className="lg:col-span-3 lg:pt-2.5">{eyebrow}</Eyebrow>
+        <div className="max-w-3xl lg:col-span-9">{heading}</div>
+      </Reveal>
+    );
+  return (
+    <Reveal className={`mb-14 max-w-3xl md:mb-20 ${className}`}>
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <div className="mt-3">{heading}</div>
+    </Reveal>
+  );
+};
 
 /** tone: which surface the band sits on. */
 export const Section = ({
@@ -72,12 +95,12 @@ export const PageHeader = ({
     <Glow soft />
     <div className="relative mx-auto max-w-6xl">
       <Reveal fade={false}>
-        <nav aria-label="Breadcrumb" className="font-mono text-[11px] uppercase tracking-[0.2em]">
+        <nav aria-label="Breadcrumb" className="text-sm">
           <Link href="/" className="text-muted transition-colors hover:text-text">
             Home
           </Link>
-          <span aria-hidden className="mx-3 text-line">/</span>
-          <span className="text-accent">{crumb}</span>
+          <span aria-hidden className="mx-2.5 text-faint">/</span>
+          <span aria-current="page" className="text-text">{crumb}</span>
         </nav>
       </Reveal>
       <Reveal fade={false} delay={0.06}>
@@ -121,9 +144,9 @@ export const Glow = ({ soft = false }: { soft?: boolean }) => {
   );
 };
 
-/** Serif italic accent for a word or phrase inside a heading. */
+/** Serif italic for a phrase inside a heading — a change of voice, not of colour. */
 export const Accent = ({ children }: { children: ReactNode }) => (
-  <em className="text-gradient inline-block pb-2 pr-2 font-serif font-normal italic tracking-normal">{children}</em>
+  <em className="font-serif font-normal italic tracking-normal">{children}</em>
 );
 
 const btnBase =
@@ -147,12 +170,11 @@ export const Button = ({
   const inner = (
     <>
       {children}
-      <span
-        aria-hidden
-        className="transition-transform duration-300 group-hover:translate-x-0.5"
-      >
-        {external ? "↗" : "→"}
-      </span>
+      {external && (
+        <span aria-hidden className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+          ↗
+        </span>
+      )}
     </>
   );
   if (external || href.startsWith("mailto:"))

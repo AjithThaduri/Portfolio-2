@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { CONTACT, NAV, SITE } from "@/lib/content";
 import { Reveal } from "./Reveal";
-import { Accent, Eyebrow, Glow } from "./Section";
+import { Accent, Eyebrow } from "./Section";
 
 const links = [
   { label: "LinkedIn", value: "in/ajiththaduri", href: SITE.linkedin },
@@ -29,7 +29,7 @@ const CopyEmail = () => {
         href={`mailto:${SITE.email}`}
         className="group flex min-w-0 flex-1 items-center gap-4 rounded-[20px] px-5 py-4 transition-colors hover:bg-surface"
       >
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">Email</span>
+        <span className="text-sm text-faint">Email</span>
         <span className="min-w-0 truncate text-lg font-light text-text transition-colors group-hover:text-accent sm:text-xl">
           {SITE.email}
         </span>
@@ -51,12 +51,11 @@ export const Contact = () => (
     id="contact"
     className="relative scroll-mt-20 overflow-hidden border-t border-line bg-ink px-6 py-24 sm:px-10 md:py-36"
   >
-    <Glow />
     <div className="relative mx-auto grid max-w-6xl gap-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-20">
       <div>
         <Reveal>
           <Eyebrow>{CONTACT.eyebrow}</Eyebrow>
-          <h2 className="mt-8 text-4xl font-medium leading-[1.05] tracking-[-0.035em] text-text sm:text-5xl md:text-6xl">
+          <h2 className="mt-4 text-4xl font-medium leading-[1.05] tracking-[-0.035em] text-text sm:text-5xl md:text-6xl">
             {CONTACT.headline[0]}
             <br />
             <Accent>{CONTACT.headline[1]}</Accent>
@@ -70,27 +69,15 @@ export const Contact = () => (
         <Reveal delay={0.14}>
           <Link
             href="/work-with-me#brief"
-            className="group mt-8 inline-flex items-center gap-2 text-sm font-medium text-text transition-colors hover:text-accent"
+            className="mt-8 inline-block text-sm font-medium text-text underline decoration-line underline-offset-[6px] transition-colors hover:decoration-accent"
           >
             Prefer a short form? Send a project brief
-            <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
           </Link>
-          <ul className="mt-8 flex flex-wrap gap-3">
-            {CONTACT.availability.map((a) => (
-              <li
-                key={a.text}
-                className="inline-flex items-center gap-2 rounded-full border border-line px-3.5 py-1.5 text-xs text-muted"
-              >
-                <span
-                  aria-hidden
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    a.dot === "live" ? "bg-emerald-400" : "bg-accent-vivid"
-                  }`}
-                />
-                {a.text}
-              </li>
-            ))}
-          </ul>
+          {CONTACT.availability.map((a) => (
+            <p key={a.text} className="mt-6 text-sm text-faint">
+              {a.text}.
+            </p>
+          ))}
         </Reveal>
       </div>
 
@@ -106,9 +93,7 @@ export const Contact = () => (
               className="group flex items-center justify-between rounded-3xl border border-line px-6 py-5 transition-colors hover:border-accent/50"
             >
               <span>
-                <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-faint">
-                  {l.label}
-                </span>
+                <span className="block text-sm text-faint">{l.label}</span>
                 <span className="mt-1 block text-text transition-colors group-hover:text-accent">
                   {l.value}
                 </span>
@@ -131,9 +116,9 @@ export const Footer = () => (
   <footer className="border-t border-line px-6 py-10 sm:px-10">
     <div className="mx-auto flex max-w-6xl flex-col gap-6 text-sm text-faint sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-3">
-        <span className="font-medium text-text">Ajith Thaduri</span>
-        <span aria-hidden>·</span>
-        <span>{SITE.location}</span>
+        <span>
+          <span className="font-medium text-text">Ajith Thaduri</span>, {SITE.location}
+        </span>
       </div>
       <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
         {[
@@ -149,7 +134,7 @@ export const Footer = () => (
           RSS
         </a>
         <a href="#top" className="transition-colors hover:text-text">
-          Back to top ↑
+          Back to top
         </a>
       </nav>
     </div>

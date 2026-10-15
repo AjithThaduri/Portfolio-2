@@ -43,6 +43,8 @@
   --sim-halo: 0.11;
   --sim-lane: 0.22;
   --sim-scale: 1.5;
+
+  /* studio backdrop behind the portrait cut-out: warm peach by day */
 }
 
 :root[data-theme="dark"] {
@@ -222,19 +224,6 @@ body {
   .page-enter { animation: none; }
 }
 
-/* Hero: notes drift a few pixels; the orbit turns once every couple of minutes. */
-@keyframes drift {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-.drift { animation: drift 7s ease-in-out infinite; }
-.drift-slow { animation: drift 9s ease-in-out infinite; }
-
-@keyframes orbit {
-  to { transform: rotate(360deg); }
-}
-.orbit { animation: orbit 140s linear infinite; }
-.orbit-rev { animation: orbit 200s linear infinite reverse; }
 
 @keyframes cue {
   0% { transform: scaleY(0); transform-origin: top; }
