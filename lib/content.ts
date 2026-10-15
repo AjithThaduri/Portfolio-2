@@ -57,6 +57,8 @@ export const PHOTOS = {
   landscape: { src: "/img/ajith-thaduri-4x3.jpg", width: 1600, height: 1200, caption: PHOTO_CAPTION },
   wide: { src: "/img/ajith-thaduri-16x9.jpg", width: 1920, height: 1080, caption: PHOTO_CAPTION },
   avatar: { src: "/img/ajith-thaduri-avatar.jpg", alt: "Ajith Thaduri" },
+  /* the studio photo on the About page */
+  about: { src: "/img/ajith-thaduri-about.webp", alt: "Ajith Thaduri, AI engineer, smiling, in a red shirt" },
 } as const;
 
 export const NAV = [

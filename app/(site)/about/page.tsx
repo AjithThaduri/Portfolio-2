@@ -45,8 +45,8 @@ export default function About() {
             <div className="overflow-hidden rounded-[28px] border border-line bg-raised p-2">
               <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-surface">
                 <Image
-                  src={PHOTOS.portrait.src}
-                  alt={PHOTOS.alt}
+                  src={PHOTOS.about.src}
+                  alt={PHOTOS.about.alt}
                   fill
                   sizes="(max-width: 1024px) 80vw, 320px"
                   className="object-cover"

@@ -27,7 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       .map((b) => page(`/blueprints/${b.slug}`, 0.8, b.updated ?? b.published)),
     ...CAPABILITIES.map((c) => page(`/capabilities/${c.slug}`, 0.6)),
     page("/open-source", 0.7),
-    page("/about", 0.7, undefined, [PHOTOS.portrait.src, PHOTOS.square.src]),
+    page("/about", 0.7, undefined, [PHOTOS.about.src, PHOTOS.square.src]),
     page("/work-with-me", 0.7),
     page("/teaching", 0.6),
     page("/glossary", 0.5),

@@ -115,6 +115,7 @@ export const CommandPalette = ({ items }: { items: SearchItem[] }) => {
                 aria-activedescendant={results[i] ? `cmd-${i}` : undefined}
                 aria-controls="cmd-results"
                 className="cmd-input h-14 min-w-0 flex-1 bg-transparent text-base text-text placeholder:text-faint"
+                style={{ outline: "none" }}
               />
               <kbd className="hidden rounded-md border border-line px-1.5 py-0.5 font-mono text-[10px] text-faint sm:inline">esc</kbd>
               <button
