@@ -61,7 +61,7 @@ export const PHOTOS = {
   /* The hero is built in depth: the evening greenery on its own, and me cut
      out in front of it, so each can move at its own speed. */
   hero: {
-    subject: { src: "/img/ajith-thaduri-hero.webp", width: 1500, height: 1450 },
+    subject: { src: "/img/ajith-thaduri-hero-front.webp", width: 1500, height: 1450 },
     plate: { src: "/img/hero-evening-plate.jpg", width: 2400, height: 1350 },
   },
 } as const;
