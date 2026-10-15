@@ -45,9 +45,6 @@
   --sim-scale: 1.5;
 
   /* studio backdrop behind the portrait cut-out: warm peach by day */
-  --portrait-1: #ffe6d3;
-  --portrait-2: #f7c9ab;
-  --portrait-3: #eaa283;
 }
 
 :root[data-theme="dark"] {
@@ -82,9 +79,6 @@
   --sim-halo: 0.16;
   --sim-lane: 0.026;
   --sim-scale: 1;
-  --portrait-1: #6e3d2a;    /* ember by night */
-  --portrait-2: #3f2421;
-  --portrait-3: #1d1315;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -120,9 +114,6 @@
     --sim-halo: 0.16;
     --sim-lane: 0.026;
     --sim-scale: 1;
-    --portrait-1: #6e3d2a;    /* ember by night */
-    --portrait-2: #3f2421;
-    --portrait-3: #1d1315;
   }
 }
 
@@ -233,12 +224,6 @@ body {
   .page-enter { animation: none; }
 }
 
-/* Portrait: the cut-out stands on a backdrop the theme paints, so the photo
-   always sits in the site's own light rather than the studio's. */
-.portrait-backdrop {
-  background:
-    radial-gradient(120% 75% at 50% 18%, var(--portrait-1) 0%, var(--portrait-2) 52%, var(--portrait-3) 100%);
-}
 
 @keyframes cue {
   0% { transform: scaleY(0); transform-origin: top; }

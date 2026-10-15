@@ -43,13 +43,13 @@ export default function About() {
         <div className="mx-auto grid max-w-6xl gap-14 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-20">
           <Reveal className="lg:sticky lg:top-32 lg:self-start">
             <div className="overflow-hidden rounded-[28px] border border-line bg-raised p-2">
-              <div className="portrait-backdrop relative aspect-[4/5] overflow-hidden rounded-[22px]">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-surface">
                 <Image
-                  src={PHOTOS.cutout.src}
-                  alt={PHOTOS.aboutAlt}
+                  src={PHOTOS.portrait.src}
+                  alt={PHOTOS.alt}
                   fill
                   sizes="(max-width: 1024px) 80vw, 320px"
-                  className="object-cover object-bottom"
+                  className="object-cover"
                 />
               </div>
             </div>

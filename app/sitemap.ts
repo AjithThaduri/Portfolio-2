@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...(images ? { images: images.map((src) => `${SITE.url}${src}`) } : {}),
   });
   // Photos of Ajith, listed against the pages that show them.
-  const photos = [PHOTOS.portrait.src, PHOTOS.square.src, PHOTOS.landscape.src, PHOTOS.wide.src];
+  const photos = [PHOTOS.avatar.src, PHOTOS.square.src, PHOTOS.landscape.src, PHOTOS.wide.src];
   return [
     page("", 1.0, undefined, photos),
     page("/work", 0.9),
@@ -27,7 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       .map((b) => page(`/blueprints/${b.slug}`, 0.8, b.updated ?? b.published)),
     ...CAPABILITIES.map((c) => page(`/capabilities/${c.slug}`, 0.6)),
     page("/open-source", 0.7),
-    page("/about", 0.7, undefined, [PHOTOS.cutout.src, PHOTOS.square.src]),
+    page("/about", 0.7, undefined, [PHOTOS.portrait.src, PHOTOS.square.src]),
     page("/work-with-me", 0.7),
     page("/teaching", 0.6),
     page("/glossary", 0.5),
